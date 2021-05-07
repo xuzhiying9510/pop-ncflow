@@ -53,6 +53,7 @@ def scatter_plot(
         ax.set_yscale("log")
     if ylim is not None:
         ax.set_ylim(ylim)
+        ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
 
     extra_artists = []
     if arrow_coords:
