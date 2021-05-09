@@ -85,10 +85,10 @@ PROBLEM_NAMES_DICT = {
     "one-wan-bidir.json": "PrivateLarge",
 }
 
-# TODO: this should be imported from benchmarks.benchmark_consts, but
-# it causes a segmentation fault
-PATH_FORM_HYPERPARAMS = (4, True, "inv-cap")
-NCI_HYPERPARAMS = {
+
+PF_PARAMS = 'num_paths == 4 and edge_disjoint == True and dist_metric == "inv-cap"'
+
+NCFLOW_HYPERPARAMS = {
     "GtsCe.graphml": (4, True, "inv-cap", "fm_partitioning", 36.0),
     "UsCarrier.graphml": (4, True, "inv-cap", "fm_partitioning", 36.0),
     "Cogentco.graphml": (4, True, "inv-cap", "fm_partitioning", 42.0),
@@ -104,6 +104,15 @@ NCI_HYPERPARAMS = {
     "one-wan-bidir.json": (4, True, "inv-cap", "fm_partitioning", 31.0),
 }
 SMORE_HYPERPARAMS = 4
+
+
+def join_with_fib_entries(df, fib_entries_df, index_cols):
+    return (
+        df.set_index(index_cols)
+        .join(fib_entries_df)
+        .reset_index()
+        .set_index(["traffic_seed", "problem", "tm_model"])
+    )
 
 
 def save_figure(filename, extra_artists=None, tight=True, ext=".pdf"):
@@ -1212,5 +1221,5 @@ def filter_by_hyperparams(per_iter_fname):
     return (
         pd.read_csv(per_iter_fname)
         .groupby(["problem", "num_partitions"])
-        .filter(lambda x: x.name[-1] == NCI_HYPERPARAMS[x.name[0]][-1])
+        .filter(lambda x: x.name[-1] == NCFLOW_HYPERPARAMS[x.name[0]][-1])
     )

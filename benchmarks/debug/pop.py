@@ -56,7 +56,7 @@ if __name__ == "__main__":
         "--split_method", type=str, choices=["random", "tailored", "means"], required=True
     )
     parser.add_argument(
-        "--split_fraction", type=float, choices=[0.0, 0.01, 0.02, 0.05, 0.1], required=True
+        "--split_fraction", type=float, required=True
     )
     args = parser.parse_args()
     run_pop(args)
