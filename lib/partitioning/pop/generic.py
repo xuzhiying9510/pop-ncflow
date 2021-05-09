@@ -31,7 +31,9 @@ class GenericSplitter(AbstractPOPSplitter):
                     sp.traffic_matrix.tm[u, v] = 0
 
         precluster = None
+        categorical = None
         if self.method == "cluster":
+            categorical = list(range(len(problem.G.edges)))
             precluster = compute_precluster(
                 np_data,
                 int(math.sqrt(len(problem.G.nodes))),
