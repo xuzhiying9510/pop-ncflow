@@ -4,6 +4,7 @@ import pickle
 import argparse
 
 import sys
+
 sys.path.append("..")
 sys.path.append("../..")
 
@@ -11,6 +12,7 @@ from benchmark_consts import PATH_FORM_HYPERPARAMS
 from lib.algorithms import PathFormulation, Objective
 from lib.problem import Problem
 from lib.graph_utils import check_feasibility
+
 
 def run_path_form(args):
     topo_fname = args.topo_fname
@@ -27,7 +29,7 @@ def run_path_form(args):
         num_paths=num_paths,
         edge_disjoint=edge_disjoint,
         dist_metric=dist_metric,
-        DEBUG=True
+        DEBUG=True,
     )
     pf.solve(problem)
     print("{}: {}".format(obj, pf.obj_val))

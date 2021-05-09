@@ -7,7 +7,7 @@ import json
 import sys
 import os
 
-OUTPUT_DIR = '../topologies'
+OUTPUT_DIR = "../topologies"
 
 
 def uni_rand(low=-1, high=1):
@@ -15,14 +15,14 @@ def uni_rand(low=-1, high=1):
 
 
 def read_graph_json(fname):
-    assert fname.endswith('.json')
+    assert fname.endswith(".json")
     with open(fname) as f:
         data = json.load(f)
     return json_graph.node_link_graph(data)
 
 
 def write_graph_json(fname, G):
-    with open(fname, 'w') as f:
+    with open(fname, "w") as f:
         json.dump(json_graph.node_link_data(G), f)
 
 
@@ -30,8 +30,8 @@ def add_bi_edge(G, src, dest, capacity=None):
     G.add_edge(src, dest)
     G.add_edge(dest, src)
     if capacity:
-        G[src][dest]['capacity'] = capacity
-        G[dest][src]['capacity'] = capacity
+        G[src][dest]["capacity"] = capacity
+        G[dest][src]["capacity"] = capacity
 
 
 ################
@@ -39,11 +39,11 @@ def add_bi_edge(G, src, dest, capacity=None):
 ################
 def two_srcs_from_meta_node():
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-2, 1))
-    G.add_node(2, label='2', pos=(0, 2))
-    G.add_node(3, label='3', pos=(-1, 0))
-    G.add_node(4, label='4', pos=(1, 0))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-2, 1))
+    G.add_node(2, label="2", pos=(0, 2))
+    G.add_node(3, label="3", pos=(-1, 0))
+    G.add_node(4, label="4", pos=(1, 0))
 
     add_bi_edge(G, 0, 2)
     add_bi_edge(G, 0, 1)
@@ -57,17 +57,17 @@ def two_srcs_from_meta_node():
 
 def dumbell_bottleneck_network():
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-2, 1.5))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-2, 1.5))
 
-    G.add_node(2, label='2', pos=(0, 2))
-    G.add_node(3, label='3', pos=(0, 1.5))
+    G.add_node(2, label="2", pos=(0, 2))
+    G.add_node(3, label="3", pos=(0, 1.5))
 
-    G.add_node(4, label='4', pos=(-1, 1))
-    G.add_node(5, label='5', pos=(-1, 0.5))
+    G.add_node(4, label="4", pos=(-1, 1))
+    G.add_node(5, label="5", pos=(-1, 0.5))
 
-    G.add_node(6, label='6', pos=(1, 0))
-    G.add_node(7, label='7', pos=(1, -0.5))
+    G.add_node(6, label="6", pos=(1, 0))
+    G.add_node(7, label="7", pos=(1, -0.5))
 
     # intra
     add_bi_edge(G, 0, 1)
@@ -87,12 +87,12 @@ def dumbell_bottleneck_network():
 
 def toy_network_1():
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-1, 0))
-    G.add_node(2, label='2', pos=(-2, -2))
-    G.add_node(3, label='3', pos=(2, 2))
-    G.add_node(4, label='4', pos=(1, 0))
-    G.add_node(5, label='5', pos=(2, -2))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-1, 0))
+    G.add_node(2, label="2", pos=(-2, -2))
+    G.add_node(3, label="3", pos=(2, 2))
+    G.add_node(4, label="4", pos=(1, 0))
+    G.add_node(5, label="5", pos=(2, -2))
 
     add_bi_edge(G, 0, 3)
     add_bi_edge(G, 0, 1)
@@ -107,19 +107,19 @@ def toy_network_1():
 
 def toy_network_2():
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-1, 0))
-    G.add_node(2, label='2', pos=(-2, -2))
-    G.add_node(3, label='3', pos=(2, 2))
-    G.add_node(4, label='4', pos=(1, 0))
-    G.add_node(5, label='5', pos=(2, -2))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-1, 0))
+    G.add_node(2, label="2", pos=(-2, -2))
+    G.add_node(3, label="3", pos=(2, 2))
+    G.add_node(4, label="4", pos=(1, 0))
+    G.add_node(5, label="5", pos=(2, -2))
 
-    G.add_node(6, label='6', pos=(-2, -4))
-    G.add_node(7, label='7', pos=(-1, -5))
-    G.add_node(8, label='8', pos=(-2, -6))
-    G.add_node(9, label='9', pos=(2, -4))
-    G.add_node(10, label='10', pos=(1, -5))
-    G.add_node(11, label='11', pos=(2, -6))
+    G.add_node(6, label="6", pos=(-2, -4))
+    G.add_node(7, label="7", pos=(-1, -5))
+    G.add_node(8, label="8", pos=(-2, -6))
+    G.add_node(9, label="9", pos=(2, -4))
+    G.add_node(10, label="10", pos=(1, -5))
+    G.add_node(11, label="11", pos=(2, -6))
 
     add_bi_edge(G, 0, 1)
     add_bi_edge(G, 0, 3)
@@ -148,12 +148,12 @@ def toy_network_2():
 
 def toy_network_3():
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-1, 0))
-    G.add_node(2, label='2', pos=(-2, -2))
-    G.add_node(3, label='3', pos=(2, 2))
-    G.add_node(4, label='4', pos=(1, 0))
-    G.add_node(5, label='5', pos=(2, -2))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-1, 0))
+    G.add_node(2, label="2", pos=(-2, -2))
+    G.add_node(3, label="3", pos=(2, 2))
+    G.add_node(4, label="4", pos=(1, 0))
+    G.add_node(5, label="5", pos=(2, -2))
 
     add_bi_edge(G, 0, 1)
     add_bi_edge(G, 0, 3)
@@ -166,10 +166,10 @@ def toy_network_3():
 
 def bottleneck_network(cap=10.0, epsilon=1e-3):
     G = nx.DiGraph()
-    G.add_node(0, label='0', pos=(-2, 2))
-    G.add_node(1, label='1', pos=(-2, -2))
-    G.add_node(2, label='2', pos=(2, 2))
-    G.add_node(3, label='3', pos=(2, -2))
+    G.add_node(0, label="0", pos=(-2, 2))
+    G.add_node(1, label="1", pos=(-2, -2))
+    G.add_node(2, label="2", pos=(2, 2))
+    G.add_node(3, label="3", pos=(2, -2))
 
     add_bi_edge(G, 0, 1, capacity=epsilon)
     add_bi_edge(G, 0, 2, capacity=cap)
@@ -187,7 +187,7 @@ def erdos_renyi(num_nodes, prob, seed=None):
 
     G = nx.convert_node_labels_to_integers(largest_scc.copy())
     for u, v in G.edges():
-        G[u][v]['capacity'] = 1000.0 # Set every link to have 1000 Mbps capacity
+        G[u][v]["capacity"] = 1000.0  # Set every link to have 1000 Mbps capacity
     return G
 
 
@@ -196,51 +196,54 @@ def erdos_renyi(num_nodes, prob, seed=None):
 #################
 def b4_teavar():
     G = nx.DiGraph()
-    with open('../topologies/b4-teavar-topology.txt') as f:
+    with open("../topologies/b4-teavar-topology.txt") as f:
         f.readline()  # skip header
         for line in f:
             vals = line.strip().split()
             # nodes are 1-indexed, capcity in Kbps
-            from_node, to_node, cap = int(vals[0]) - 1, int(
-                vals[1]) - 1, float(vals[2]) / 1000.0
+            from_node, to_node, cap = (
+                int(vals[0]) - 1,
+                int(vals[1]) - 1,
+                float(vals[2]) / 1000.0,
+            )
             G.add_edge(from_node, to_node, capacity=cap)
     return G
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     arg = sys.argv[1]
-    if arg == '1':
+    if arg == "1":
         G = toy_network_1()
-        fname = 'toy-network.json'
+        fname = "toy-network.json"
 
-    elif arg == '2':
+    elif arg == "2":
         G = toy_network_2()
-        fname = 'toy-network-2.json'
+        fname = "toy-network-2.json"
 
-    elif arg == '3':
+    elif arg == "3":
         G = toy_network_2()
-        fname = 'toy-network-3.json'
+        fname = "toy-network-3.json"
 
-    elif arg == 'b4-teavar':
+    elif arg == "b4-teavar":
         G = b4_teavar()
-        fname = 'b4-teavar.json'
+        fname = "b4-teavar.json"
 
-    elif arg == 'bottleneck':
+    elif arg == "bottleneck":
         G = bottleneck_network()
-        fname = 'bottleneck.json'
+        fname = "bottleneck.json"
 
-    elif arg == 'two-srcs':
+    elif arg == "two-srcs":
         G = two_srcs_from_meta_node()
-        fname = 'two-srcs.json'
+        fname = "two-srcs.json"
 
-    elif arg == 'dumbell-bottleneck':
+    elif arg == "dumbell-bottleneck":
         G = dumbell_bottleneck_network()
-        fname = 'dumbell-bottleneck.json'
+        fname = "dumbell-bottleneck.json"
 
-    elif arg == 'erdos-renyi':
-        seed = int(sys.argv[2]) if len(sys.argv) > 2 else np.random.randint(2**31 - 1)
+    elif arg == "erdos-renyi":
+        seed = int(sys.argv[2]) if len(sys.argv) > 2 else np.random.randint(2 ** 31 - 1)
         G = erdos_renyi(1000, 0.005, seed=seed)
-        fname = 'erdos-renyi-{}.json'.format(seed)
+        fname = "erdos-renyi-{}.json".format(seed)
 
     data = json_graph.node_link_data(G)
     write_graph_json(os.path.join(OUTPUT_DIR, fname), G)

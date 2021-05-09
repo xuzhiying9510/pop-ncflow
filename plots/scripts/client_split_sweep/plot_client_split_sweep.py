@@ -13,7 +13,6 @@ from lib.cdf_utils import get_ratio_df, plot_cdfs, per_iter_to_nc_df
 PF_PARAMS = 'num_paths == 4 and edge_disjoint == True and dist_metric == "inv-cap"'
 
 
-
 def get_ratio_dataframes(curr_dir, query_str=None):
     # Path Formulation DF
     path_form_df = (
@@ -37,19 +36,37 @@ def get_ratio_dataframes(curr_dir, query_str=None):
         pop_df = pop_df.query(query_str)
 
     def get_pop_dfs(pop_parent_df, suffix):
-        pop_e0_poisson_df = pop_parent_df.query('split_fraction == 0 and tm_model == "poisson-high-intra"')
-        pop_e25_poisson_df = pop_parent_df.query('split_fraction == 0.25 and tm_model == "poisson-high-intra"')
-        pop_e50_poisson_df = pop_parent_df.query('split_fraction == 0.5 and tm_model == "poisson-high-intra"')
-        pop_e75_poisson_df = pop_parent_df.query('split_fraction == 0.75 and tm_model == "poisson-high-intra"')
-        pop_e100_poisson_df = pop_parent_df.query('split_fraction == 1.0 and tm_model == "poisson-high-intra"')
-       
- 
-        pop_e0_gravity_df = pop_parent_df.query('split_fraction == 0 and tm_model == "gravity"')
-        pop_e25_gravity_df = pop_parent_df.query('split_fraction == 0.25 and tm_model == "gravity"')
-        pop_e50_gravity_df = pop_parent_df.query('split_fraction == 0.5 and tm_model == "gravity"')
-        pop_e75_gravity_df = pop_parent_df.query('split_fraction == 0.75 and tm_model == "gravity"')
-        pop_e100_gravity_df = pop_parent_df.query('split_fraction == 1.00 and tm_model == "gravity"')
-        
+        pop_e0_poisson_df = pop_parent_df.query(
+            'split_fraction == 0 and tm_model == "poisson-high-intra"'
+        )
+        pop_e25_poisson_df = pop_parent_df.query(
+            'split_fraction == 0.25 and tm_model == "poisson-high-intra"'
+        )
+        pop_e50_poisson_df = pop_parent_df.query(
+            'split_fraction == 0.5 and tm_model == "poisson-high-intra"'
+        )
+        pop_e75_poisson_df = pop_parent_df.query(
+            'split_fraction == 0.75 and tm_model == "poisson-high-intra"'
+        )
+        pop_e100_poisson_df = pop_parent_df.query(
+            'split_fraction == 1.0 and tm_model == "poisson-high-intra"'
+        )
+
+        pop_e0_gravity_df = pop_parent_df.query(
+            'split_fraction == 0 and tm_model == "gravity"'
+        )
+        pop_e25_gravity_df = pop_parent_df.query(
+            'split_fraction == 0.25 and tm_model == "gravity"'
+        )
+        pop_e50_gravity_df = pop_parent_df.query(
+            'split_fraction == 0.5 and tm_model == "gravity"'
+        )
+        pop_e75_gravity_df = pop_parent_df.query(
+            'split_fraction == 0.75 and tm_model == "gravity"'
+        )
+        pop_e100_gravity_df = pop_parent_df.query(
+            'split_fraction == 1.00 and tm_model == "gravity"'
+        )
 
         return [
             get_ratio_df(df, path_form_df, "obj_val", suffix)
@@ -80,7 +97,7 @@ def plot_client_split_sweep_cdfs(
     query_str='problem not in ["Uninett2010.graphml", "Ion.graphml", "Interoute.graphml"]',
 ):
     ratio_dfs = get_ratio_dataframes(curr_dir, query_str)
-    
+
     pop_e0_poisson_df = ratio_dfs[0]
     pop_e25_poisson_df = ratio_dfs[1]
     pop_e50_poisson_df = ratio_dfs[2]
@@ -92,7 +109,6 @@ def plot_client_split_sweep_cdfs(
     pop_e50_gravity_df = ratio_dfs[7]
     pop_e75_gravity_df = ratio_dfs[8]
     pop_e100_gravity_df = ratio_dfs[9]
-
 
     nc_ratio_df = ratio_dfs[-1]
 
@@ -128,7 +144,13 @@ def plot_client_split_sweep_cdfs(
             pop_e0_gravity_df["speedup_ratio"],
             pop_e100_gravity_df["speedup_ratio"],
         ],
-        ["Poisson, 0%", "Poisson, 50%", "Poisson, 100%", "Gravity, 0%", "Gravity, 100%"],
+        [
+            "Poisson, 0%",
+            "Poisson, 50%",
+            "Poisson, 100%",
+            "Gravity, 0%",
+            "Gravity, 100%",
+        ],
         "speedup-cdf-client_split_sweep",
         x_log=True,
         x_label=r"Speedup, relative to PF4 (log scale)",
@@ -146,7 +168,13 @@ def plot_client_split_sweep_cdfs(
             pop_e0_gravity_df["flow_ratio"],
             pop_e100_gravity_df["flow_ratio"],
         ],
-        ["Poisson, 0%", "Poisson, 50%", "Poisson, 100%", "Gravity, 0%", "Gravity, 100%"],
+        [
+            "Poisson, 0%",
+            "Poisson, 50%",
+            "Poisson, 100%",
+            "Gravity, 0%",
+            "Gravity, 100%",
+        ],
         "total-flow-cdf-client_split_sweep",
         x_log=False,
         x_label=r"Total Flow, relative to PF4",

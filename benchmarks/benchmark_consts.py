@@ -110,7 +110,7 @@ def get_args_and_problems(output_csv_template):
         "--slices", type=int, choices=range(5), nargs="+", required=True
     )
     args = parser.parse_args()
-    slice_str = 'slice_' + '_'.join(str(i) for i in args.slices)
+    slice_str = "slice_" + "_".join(str(i) for i in args.slices)
     output_csv = output_csv_template.format(args.obj, slice_str)
     return args, output_csv, get_problems(args)
 

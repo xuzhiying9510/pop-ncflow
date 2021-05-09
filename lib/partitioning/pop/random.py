@@ -15,7 +15,7 @@ class RandomSplitter(AbstractPOPSplitter):
         for sp in sub_problems:
             for u in sp.G.nodes:
                 for v in sp.G.nodes:
-                    sp.traffic_matrix.tm[u,v] = 0 
+                    sp.traffic_matrix.tm[u, v] = 0
 
         entity_list = [[k, u, v, d] for (k, (u, v, d)) in problem.commodity_list]
 
@@ -27,14 +27,17 @@ class RandomSplitter(AbstractPOPSplitter):
             # create list of assigned sps by randomly sampling sps (without replacement, if possible)
             # until all entities have been assigned
             while len(assigned_sps_list) < num_subentities:
-                num_to_add = min([num_subentities-len(assigned_sps_list), self._num_subproblems])
+                num_to_add = min(
+                    [num_subentities - len(assigned_sps_list), self._num_subproblems]
+                )
                 randperm = np.random.permutation(np.arange(self._num_subproblems))
                 assigned_sps_list += list(randperm[:num_to_add])
 
-
             for ind, [_, source, target, demand] in enumerate(split_list):
-                sub_problems[assigned_sps_list[ind]].traffic_matrix.tm[source, target] += demand
-        
+                sub_problems[assigned_sps_list[ind]].traffic_matrix.tm[
+                    source, target
+                ] += demand
+
         for sub_problem in sub_problems:
             for u, v in sub_problems[-1].G.edges:
                 sub_problem.G[u][v]["capacity"] = (

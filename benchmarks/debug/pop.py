@@ -4,6 +4,7 @@ import pickle
 import argparse
 
 import sys
+
 sys.path.append("..")
 sys.path.append("../..")
 
@@ -11,6 +12,7 @@ from benchmark_consts import PATH_FORM_HYPERPARAMS
 from lib.algorithms import POP, Objective
 from lib.problem import Problem
 from lib.graph_utils import check_feasibility
+
 
 def run_pop(args):
     obj = args.obj
@@ -53,10 +55,11 @@ if __name__ == "__main__":
         "--num_subproblems", type=int, choices=[1, 2, 4, 8, 16, 32, 64], required=True
     )
     parser.add_argument(
-        "--split_method", type=str, choices=["random", "tailored", "means"], required=True
+        "--split_method",
+        type=str,
+        choices=["random", "tailored", "means"],
+        required=True,
     )
-    parser.add_argument(
-        "--split_fraction", type=float, required=True
-    )
+    parser.add_argument("--split_fraction", type=float, required=True)
     args = parser.parse_args()
     run_pop(args)

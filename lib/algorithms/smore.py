@@ -177,7 +177,9 @@ class SMORE(AbstractFormulation):
         edge_to_paths, num_paths = self.pre_solve()
         if self._objective == Objective.TOTAL_FLOW:
             self._print("Constructing Total Flow LP")
-            return self._construct_total_flow_lp(self.problem.G, edge_to_paths, num_paths)
+            return self._construct_total_flow_lp(
+                self.problem.G, edge_to_paths, num_paths
+            )
         elif self._objective == Objective.MIN_MAX_LINK_UTIL:
             self._print("Constructing SMORE LP")
             return self._construct_smore_lp(self.problem.G, edge_to_paths, num_paths)

@@ -6,6 +6,7 @@ import sys
 
 EPS = 1e-5
 
+
 @unique
 class Objective(Enum):
     TOTAL_FLOW = 0
@@ -148,4 +149,3 @@ class AbstractFormulation(object):
                 self._min_frac_flow = min(self._min_frac_flow, out_flow / d_k)
                 self.frac_flows[commod_key] = out_flow / d_k
         return self._min_frac_flow
-

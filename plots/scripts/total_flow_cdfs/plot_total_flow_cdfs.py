@@ -16,7 +16,7 @@ from plot_utils import (
     change_poisson_in_df,
     print_stats,
     sort_and_set_index,
-    PF_PARAMS
+    PF_PARAMS,
 )
 
 

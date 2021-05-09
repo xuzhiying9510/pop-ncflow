@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,13 +11,16 @@ from .plot_utils import (
     LABEL_NAMES_DICT,
 )
 
+
 def get_ratio_df(other_df, baseline_df, target_col, suffix):
     join_df = baseline_df.join(
         other_df, how="inner", lsuffix="_baseline", rsuffix=suffix
     ).reset_index()
     results = []
     for _, row in join_df.iterrows():
-        target_col_ratio = row[target_col + suffix] / row["{}_baseline".format(target_col)]
+        target_col_ratio = (
+            row[target_col + suffix] / row["{}_baseline".format(target_col)]
+        )
         speedup_ratio = row["runtime_baseline"] / row["runtime{}".format(suffix)]
         results.append(
             [
@@ -43,6 +45,7 @@ def get_ratio_df(other_df, baseline_df, target_col, suffix):
         data=results,
     )
     return df
+
 
 def plot_cdfs(
     vals_list,
@@ -120,6 +123,7 @@ def plot_cdfs(
         save_figure(fname, extra_artists=extra_artists)
     # plt.show()
 
+
 def per_iter_to_nc_df(per_iter_fname):
     per_iter_df = filter_by_hyperparams(per_iter_fname).drop(
         columns=[
@@ -153,4 +157,3 @@ def per_iter_to_nc_df(per_iter_fname):
     ).sum()
 
     return sort_and_set_index(nc_iterative_df)
-

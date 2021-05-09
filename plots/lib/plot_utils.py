@@ -13,15 +13,15 @@ plt.rcParams["lines.markersize"] = 11
 plt.rcParams["lines.linewidth"] = 4.0
 plt.rcParams["legend.handlelength"] = 2.25
 plt.rcParams["axes.grid"] = True
-sns.set_style('ticks')
+sns.set_style("ticks")
 font = {
-    'font.family':'Roboto',
-    'font.size': 12,
+    "font.family": "Roboto",
+    "font.size": 12,
 }
 sns.set_style(font)
 paper_rc = {
-    'lines.linewidth': 3,
-    'lines.markersize': 10,
+    "lines.linewidth": 3,
+    "lines.markersize": 10,
 }
 sns.set_context("paper", font_scale=2, rc=paper_rc)
 sns.set_style({"axes.spines.right": False, "axes.spines.top": False})
@@ -140,6 +140,7 @@ def save_figure(filename, extra_artists=None, tight=True, ext=".pdf"):
         else:
             plt.savefig(filename)
 
+
 # Print stats
 def print_stats(df, df_name, cols_in_df):
     for col_in_df in cols_in_df:
@@ -155,12 +156,14 @@ def print_stats(df, df_name, cols_in_df):
         )
         print()
 
+
 def sort_and_set_index(df, drop=False):
     return change_poisson_in_df(
         df.reset_index(drop=drop).sort_values(
             by=["problem", "tm_model", "scale_factor", "traffic_seed"]
         )
     ).set_index(["problem", "tm_model", "traffic_seed", "scale_factor"])
+
 
 POISSON_HIGH_INTRA = set(
     [

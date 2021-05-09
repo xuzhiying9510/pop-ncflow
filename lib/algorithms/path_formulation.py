@@ -228,15 +228,16 @@ class PathFormulation(AbstractFormulation):
                 return paths_dict
         except FileNotFoundError:
             print("Unable to find {}".format(paths_fname))
-            paths_dict = PathFormulation.compute_paths(problem, num_paths, edge_disjoint, dist_metric)
+            paths_dict = PathFormulation.compute_paths(
+                problem, num_paths, edge_disjoint, dist_metric
+            )
             print("Saving paths to pickle file")
             with open(paths_fname, "wb") as w:
                 pickle.dump(paths_dict, w)
             return paths_dict
 
-
     def get_paths(self, problem):
-        if not hasattr(self, '_paths_dict'):
+        if not hasattr(self, "_paths_dict"):
             self._paths_dict = PathFormulation.read_paths_from_disk_or_compute(
                 problem, self._num_paths, self.edge_disjoint, self.dist_metric
             )

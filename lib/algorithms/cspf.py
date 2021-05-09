@@ -106,10 +106,7 @@ class CSPF(AbstractFormulation):
         tm = problem.traffic_matrix.tm
 
         paths_dict = PathFormulation.read_paths_from_disk_or_compute(
-            problem,
-            self._num_paths,
-            self.edge_disjoint,
-            self.dist_metric,
+            problem, self._num_paths, self.edge_disjoint, self.dist_metric,
         )
 
         # initialize link capacity dict
@@ -156,7 +153,7 @@ class CSPF(AbstractFormulation):
             self._total_flow += demand
 
         self._runtime = (datetime.now() - startTime).total_seconds()
-    
+
     @property
     def obj_val(self):
         return self._total_flow
