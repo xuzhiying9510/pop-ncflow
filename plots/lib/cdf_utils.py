@@ -106,6 +106,8 @@ def get_ratio_dataframes(
     pop_df = sort_and_set_index(pop_df, drop=True)
     if parent_query_str is not None:
         pop_df = pop_df.query(parent_query_str)
+    if pop_parent_query_str is not None:
+        pop_df = pop_df.query(pop_parent_query_str)
 
     def get_ratio_dfs(parent_df, query_strs, suffix):
         return {
@@ -116,7 +118,7 @@ def get_ratio_dataframes(
         }
 
     pop_dfs = (
-        get_ratio_dfs(pop_df.query(pop_parent_query_str), pop_query_strs, "_pop")
+        get_ratio_dfs(pop_df, pop_query_strs, "_pop")
         if len(pop_query_strs) > 0
         else pop_df
     )
