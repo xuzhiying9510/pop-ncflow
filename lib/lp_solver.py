@@ -48,7 +48,7 @@ class LpSolver(object):
         if numeric_focus:
             model.setParam("NumericFocus", 1)
         if num_threads:
-            model.setParam("Threads", num_threads)
+            model.setParam("Threads", int(num_threads))
         model.setParam("LogFile", self.gurobi_out)
         try:
             if bar_tol:
