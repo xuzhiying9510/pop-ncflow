@@ -1,28 +1,30 @@
+import math
+import os
+import pickle
+import random
+import re
+import time
+from collections import defaultdict
+
+import numpy as np
+from gurobipy import GRB, Model, quicksum
+from pathos import multiprocessing
+
+from ..config import TOPOLOGIES_DIR
+from ..constants import NUM_CORES
+from ..graph_utils import path_to_edge_list
 from ..lp_solver import LpSolver
 from ..partitioning.pop import (
-    SmartSplitter,
     BaselineSplitter,
     GenericSplitter,
     RandomSplitter,
     RandomSplitter2,
+    SmartSplitter,
 )
-from ..constants import NUM_CORES
-from ..runtime_utils import parallelized_rt
-from ..graph_utils import path_to_edge_list
 from ..path_utils import find_paths, graph_copy_with_edge_weights, remove_cycles
-from ..config import TOPOLOGIES_DIR
+from ..runtime_utils import parallelized_rt
 from .abstract_formulation import Objective
 from .path_formulation import PathFormulation
-from gurobipy import GRB, Model, quicksum
-from collections import defaultdict
-from pathos import multiprocessing
-import numpy as np
-import math
-import random
-import re
-import os
-import time
-import pickle
 
 PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "path-form")
 

@@ -42,13 +42,19 @@ class LpSolver(object):
     # Note: this is not idempotent: the `model` parameter will be changed after invoking
     # this function
     def solve_lp(
-        self, num_threads=None, bar_tol=None, err_tol=None, numeric_focus=False
+        self,
+        method=Method.CONCURRENT,
+        num_threads=None,
+        bar_tol=None,
+        err_tol=None,
+        numeric_focus=False,
     ):
         model = self._model
         if numeric_focus:
             model.setParam("NumericFocus", 1)
         if num_threads:
             model.setParam("Threads", int(num_threads))
+        model.setParam("Method", method.value)
         model.setParam("LogFile", self.gurobi_out)
         try:
             if bar_tol:
