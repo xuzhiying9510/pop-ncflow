@@ -18,12 +18,16 @@ PROBLEM_NAMES = [
     "TataNld.graphml",
     "Deltacom.graphml",
     "DialtelecomCz.graphml",
-    # "Uninett2010.graphml",
-    # "Interoute.graphml",
-    # "Ion.graphml",
     "Kdl.graphml",
-    # "erdos-renyi-1260231677.json",
 ]
+TM_MODELS = [
+    "uniform",
+    "gravity",
+    "bimodal",
+    "poisson-high-intra",
+    "poisson-high-inter",
+]
+SCALE_FACTORS = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0]
 
 PATH_FORM_HYPERPARAMS = (4, True, "inv-cap")
 NCFLOW_HYPERPARAMS = {
@@ -41,13 +45,6 @@ NCFLOW_HYPERPARAMS = {
     "erdos-renyi-1260231677.json": (4, True, "inv-cap", FMPartitioning, 3),
 }
 
-TM_MODELS = [
-    "uniform",
-    "gravity",
-    "bimodal",
-    "poisson-high-intra",
-    "poisson-high-inter",
-]
 PROBLEM_NAMES_AND_TM_MODELS = [
     (prob_name, tm_model) for prob_name in PROBLEM_NAMES for tm_model in TM_MODELS
 ]
@@ -95,20 +92,45 @@ for key, vals in GROUPED_BY_HOLDOUT_PROBLEMS.items():
 
 def get_problems(args):
     problems = []
-    for (problem_name, _, _,), topo_and_tm_fnames in GROUPED_BY_PROBLEMS.items():
+    for (
+        (problem_name, tm_model, scale_factor),
+        topo_and_tm_fnames,
+    ) in GROUPED_BY_PROBLEMS.items():
         for slice in args.slices:
-            topo_fname, tm_fname = topo_and_tm_fnames[slice]
-            problems.append((problem_name, topo_fname, tm_fname))
+            if (
+                ("all" in args.topos or problem_name in args.topos)
+                and ("all" in args.tm_models or tm_model in args.tm_models)
+                and ("all" in args.scale_factors or scale_factor in args.scale_factors)
+            ):
+                topo_fname, tm_fname = topo_and_tm_fnames[slice]
+                problems.append((problem_name, topo_fname, tm_fname))
     return problems
 
 
-def get_args_and_problems(output_csv_template):
+def get_args_and_problems(output_csv_template, additional_args=[]):
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
     parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"], required=True)
     parser.add_argument(
+        "--tm-models", type=str, choices=TM_MODELS + ["all"], nargs="+", default="all",
+    )
+    parser.add_argument(
+        "--topos", type=str, choices=PROBLEM_NAMES + ["all"], nargs="+", default="all",
+    )
+    parser.add_argument(
+        "--scale-factors",
+        type=lambda x: x if x == "all" else float(x),
+        choices=SCALE_FACTORS + ["all"],
+        nargs="+",
+        default="all",
+    )
+    parser.add_argument(
         "--slices", type=int, choices=range(5), nargs="+", required=True
     )
+
+    for additional_arg in additional_args:
+        name_or_flags, kwargs = additional_arg[0], additional_arg[1]
+        parser.add_argument(name_or_flags, **kwargs)
     args = parser.parse_args()
     slice_str = "slice_" + "_".join(str(i) for i in args.slices)
     output_csv = output_csv_template.format(args.obj, slice_str)

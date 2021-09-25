@@ -1,15 +1,17 @@
-from ..lp_solver import LpSolver
-from ..graph_utils import path_to_edge_list
-from ..path_utils import find_paths, graph_copy_with_edge_weights, remove_cycles
-from ..config import TOPOLOGIES_DIR
-from .abstract_formulation import AbstractFormulation, Objective
-from gurobipy import GRB, Model, quicksum
-from collections import defaultdict
-import numpy as np
-import re
 import os
-import time
 import pickle
+import re
+from collections import defaultdict
+
+import numpy as np
+from gurobipy import GRB, Model, quicksum
+
+from ..config import TOPOLOGIES_DIR
+from ..constants import NUM_CORES
+from ..graph_utils import path_to_edge_list
+from ..lp_solver import LpSolver
+from ..path_utils import find_paths, graph_copy_with_edge_weights, remove_cycles
+from .abstract_formulation import AbstractFormulation, Objective
 
 PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "path-form")
 
@@ -246,6 +248,11 @@ class PathFormulation(AbstractFormulation):
     ###############################
     # Override superclass methods #
     ###############################
+
+    def solve(self, problem):
+        self._problem = problem
+        self._solver = self._construct_lp([])
+        return self._solver.solve_lp(num_threads=NUM_CORES)
 
     def pre_solve(self, problem=None):
         if problem is None:

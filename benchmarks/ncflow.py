@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from benchmark_consts import get_args_and_problems, print_, NCFLOW_HYPERPARAMS
+from benchmark_helpers import get_args_and_problems, print_, NCFLOW_HYPERPARAMS
 
 import os
 import pickle
