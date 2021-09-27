@@ -3,28 +3,21 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-# palette = sns.color_palette('Paired', 8)
-# sns.set_palette(palette)
-palette = sns.color_palette()
-
-plt.rcParams["font.size"] = 17
-plt.rcParams["axes.labelsize"] = 19
-plt.rcParams["lines.markersize"] = 11
-plt.rcParams["lines.linewidth"] = 4.0
-plt.rcParams["legend.handlelength"] = 2.25
-plt.rcParams["axes.grid"] = True
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
 sns.set_style("ticks")
 font = {
-    "font.family": "Roboto",
-    "font.size": 12,
+    'font.family':'Roboto',
+    'font.size': 12,
 }
 sns.set_style(font)
 paper_rc = {
-    "lines.linewidth": 3,
-    "lines.markersize": 10,
+    'lines.linewidth': 3,
+    'lines.markersize': 10,
 }
 sns.set_context("paper", font_scale=2, rc=paper_rc)
 sns.set_style({"axes.spines.right": False, "axes.spines.top": False})
+palette = sns.color_palette()
 
 MARKER_NAMES_DICT = {
     "nc": "o",
