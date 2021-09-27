@@ -11,8 +11,8 @@ sys.path.append("..")
 from lib.partitioning import FMPartitioning, SpectralClustering
 
 PROBLEM_NAMES = [
-    "GtsCe.graphml",
-    "UsCarrier.graphml",
+#    "GtsCe.graphml",
+#    "UsCarrier.graphml",
     "Cogentco.graphml",
     "Colt.graphml",
     "TataNld.graphml",
