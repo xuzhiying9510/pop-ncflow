@@ -1,28 +1,13 @@
-from ..lp_solver import LpSolver
-from ..partitioning.pop import (
-    SmartSplitter,
-    BaselineSplitter,
-    GenericSplitter,
-    RandomSplitter,
-    RandomSplitter2,
-)
-from ..constants import NUM_CORES
-from ..runtime_utils import parallelized_rt
-from ..graph_utils import path_to_edge_list
-from ..path_utils import find_paths, graph_copy_with_edge_weights, remove_cycles
+import os
+from collections import defaultdict
+
 from ..config import TOPOLOGIES_DIR
+from ..constants import NUM_CORES
+from ..partitioning.pop import (BaselineSplitter, GenericSplitter,
+                                RandomSplitter, RandomSplitter2, SmartSplitter)
+from ..runtime_utils import parallelized_rt
 from .abstract_formulation import Objective
 from .path_formulation import PathFormulation
-from gurobipy import GRB, Model, quicksum
-from collections import defaultdict
-from pathos import multiprocessing
-import numpy as np
-import math
-import random
-import re
-import os
-import time
-import pickle
 
 PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "path-form")
 
@@ -180,16 +165,9 @@ class POP(PathFormulation):
             for subproblem in self._subproblem_list
         ]
         self._paths_dict = self.get_paths(problem)
-        if self.DEBUG:
-            for pf, subproblem in zip(self._pfs, self._subproblem_list):
-                pf._paths_dict = self._paths_dict
-                pf.solve(subproblem)
-        else:
-            pool = multiprocessing.ProcessPool(NUM_CORES)
-            results = pool.map(self.solve_subproblem, range(self._num_subproblems))
-            for (runtime, sol_dict), pf in zip(results, self._pfs):
-                pf._runtime = runtime
-                pf._sol_dict = sol_dict
+        for pf, subproblem in zip(self._pfs, self._subproblem_list):
+            pf._paths_dict = self._paths_dict
+            pf.solve(subproblem)
 
     @property
     def sol_dict(self):

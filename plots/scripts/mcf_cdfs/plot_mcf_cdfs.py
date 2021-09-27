@@ -7,88 +7,42 @@ import pandas as pd
 import sys
 
 sys.path.append("../..")
-from lib.plot_utils import print_stats, sort_and_set_index
-from lib.cdf_utils import plot_cdfs, get_ratio_df
 
-PF_PARAMS = 'num_paths == 4 and edge_disjoint == True and dist_metric == "inv-cap"'
+from lib.plot_utils import print_stats
+from lib.cdf_utils import plot_cdfs, get_ratio_dataframes
 
 
-def get_ratio_dataframes(curr_dir, query_str=None):
-    # Path Formulation DF
-    path_form_df = (
-        pd.read_csv(curr_dir + "path-form.csv")
-        .drop(columns=["num_nodes", "num_edges", "num_commodities"])
-        .query(PF_PARAMS)
+def plot_mcf_cdfs(title=""):
+    random_32 = 'split_method == "random" and num_subproblems == 32'
+    means_32 = 'split_method == "means" and num_subproblems == 32'
+    random_16 = 'split_method == "random" and num_subproblems == 16'
+    means_16 = 'split_method == "means" and num_subproblems == 16'
+    random_4 = 'split_method == "random" and num_subproblems == 4'
+    means_4 = 'split_method == "means" and num_subproblems == 4'
+
+    ratio_dfs = get_ratio_dataframes(
+        "path-form.csv",
+        "pop.csv",
+        pop_parent_query_str=None,
+        pop_query_strs=[random_32, means_32, random_16, means_16, random_4, means_4],
     )
-    path_form_df = sort_and_set_index(path_form_df, drop=True)
-    if query_str is not None:
-        path_form_df = path_form_df.query(query_str)
 
-    # POP DF
-    pop_df = pd.read_csv(curr_dir + "pop.csv")
-    pop_df = sort_and_set_index(pop_df, drop=True)
-    if query_str is not None:
-        pop_df = pop_df.query(query_str)
+    pop_random_32_df = ratio_dfs["POP"][random_32]
+    pop_random_16_df = ratio_dfs["POP"][random_16]
+    pop_random_4_df = ratio_dfs["POP"][random_4]
 
-    def get_pop_dfs(pop_parent_df, suffix):
-        pop_random_32_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 32'
-        )
-        pop_random_16_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 16'
-        )
-        pop_random_4_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 4'
-        )
+    pop_means_32_df = ratio_dfs["POP"][means_32]
+    pop_means_16_df = ratio_dfs["POP"][means_16]
+    pop_means_4_df = ratio_dfs["POP"][means_4]
 
-        pop_means_32_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 32'
-        )
-        pop_means_16_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 16'
-        )
-        pop_means_4_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 4'
-        )
+    print_stats(pop_random_32_df, "Random, 32", ["obj_val_ratio", "speedup_ratio"])
+    print_stats(pop_means_32_df, "Power-of-two, 32", ["obj_val_ratio", "speedup_ratio"])
 
-        return [
-            get_ratio_df(df, path_form_df, "obj_val", suffix)
-            for df in [
-                pop_random_32_df,
-                pop_random_16_df,
-                pop_random_4_df,
-                pop_means_32_df,
-                pop_means_16_df,
-                pop_means_4_df,
-            ]
-        ]
+    print_stats(pop_random_16_df, "Random, 16", ["obj_val_ratio", "speedup_ratio"])
+    print_stats(pop_means_16_df, "Power-of-two, 16", ["obj_val_ratio", "speedup_ratio"])
 
-    return get_pop_dfs(pop_df, "_pop")
-
-
-def plot_mcf_cdfs(
-    curr_dir,
-    title="",
-    query_str='problem not in ["Uninett2010.graphml", "Ion.graphml", "Interoute.graphml"]',
-):
-    ratio_dfs = get_ratio_dataframes(curr_dir, query_str)
-
-    pop_random_32_df = ratio_dfs[0]
-    pop_random_16_df = ratio_dfs[1]
-    pop_random_4_df = ratio_dfs[2]
-
-    pop_means_32_df = ratio_dfs[4]
-    pop_means_16_df = ratio_dfs[4]
-    pop_means_4_df = ratio_dfs[5]
-
-    # print_stats(pop_random_32_df, "Random, 32", ["obj_val_ratio", "speedup_ratio"])
-    # print_stats(pop_means_32_df, "Power-of-two, 32", ["obj_val_ratio", "speedup_ratio"])
-
-    # print_stats(pop_random_16_df, "Random, 16", ["obj_val_ratio", "speedup_ratio"])
-    # print_stats(pop_means_16_df, "Power-of-two, 16", ["obj_val_ratio", "speedup_ratio"])
-
-    # print_stats(pop_random_4_df, "Random, 4", ["obj_val_ratio", "speedup_ratio"])
-    # print_stats(pop_means_4_df, "Power-of-two, 4", ["obj_val_ratio", "speedup_ratio"])
+    print_stats(pop_random_4_df, "Random, 4", ["obj_val_ratio", "speedup_ratio"])
+    print_stats(pop_means_4_df, "Power-of-two, 4", ["obj_val_ratio", "speedup_ratio"])
 
     # Plot CDFs
     plot_cdfs(
@@ -145,4 +99,4 @@ def plot_mcf_cdfs(
 
 
 if __name__ == "__main__":
-    plot_mcf_cdfs("./")
+    plot_mcf_cdfs()
