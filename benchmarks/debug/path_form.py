@@ -8,7 +8,8 @@ import sys
 sys.path.append("..")
 sys.path.append("../..")
 
-from benchmark_consts import PATH_FORM_HYPERPARAMS
+from benchmark_helpers import PATH_FORM_HYPERPARAMS
+from lib.algorithms.abstract_formulation import OBJ_STRS
 from lib.algorithms import PathFormulation, Objective
 from lib.problem import Problem
 from lib.graph_utils import check_feasibility
@@ -42,7 +43,7 @@ def run_path_form(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"], required=True)
+    parser.add_argument("--obj", type=str, choices=OBJ_STRS, required=True)
     parser.add_argument("--topo_fname", type=str, required=True)
     parser.add_argument("--tm_fname", type=str, required=True)
     args = parser.parse_args()

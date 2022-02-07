@@ -8,11 +8,10 @@ import sys
 
 sys.path.append("..")
 
+from lib.algorithms.abstract_formulation import OBJ_STRS
 from lib.partitioning import FMPartitioning, SpectralClustering
 
 PROBLEM_NAMES = [
-#    "GtsCe.graphml",
-#    "UsCarrier.graphml",
     "Cogentco.graphml",
     "Colt.graphml",
     "TataNld.graphml",
@@ -110,12 +109,25 @@ def get_problems(args):
 def get_args_and_problems(output_csv_template, additional_args=[]):
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
-    parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"], required=True)
     parser.add_argument(
-        "--tm-models", type=str, choices=TM_MODELS + ["all"], nargs="+", default="all",
+        "--obj",
+        type=str,
+        choices=OBJ_STRS,
+        required=True,
     )
     parser.add_argument(
-        "--topos", type=str, choices=PROBLEM_NAMES + ["all"], nargs="+", default="all",
+        "--tm-models",
+        type=str,
+        choices=TM_MODELS + ["all"],
+        nargs="+",
+        default="all",
+    )
+    parser.add_argument(
+        "--topos",
+        type=str,
+        choices=PROBLEM_NAMES + ["all"],
+        nargs="+",
+        default="all",
     )
     parser.add_argument(
         "--scale-factors",

@@ -1,4 +1,5 @@
 from ..graph_utils import compute_in_or_out_flow
+from collections import defaultdict
 from enum import Enum, unique
 import pickle
 import re
@@ -6,6 +7,8 @@ import sys
 
 EPS = 1e-5
 
+
+OBJ_STRS = ["total_flow", "mcf", "min_max_link_util"]
 
 @unique
 class Objective(Enum):
@@ -21,6 +24,8 @@ class Objective(Enum):
             return cls.TOTAL_FLOW
         elif obj_str == "mcf":
             return cls.MAX_CONCURRENT_FLOW
+        elif obj_str == "min_max_link_util":
+            return cls.MIN_MAX_LINK_UTIL
         else:
             raise Exception("{} not supported".format(obj_str))
 
@@ -122,6 +127,8 @@ class AbstractFormulation(object):
                 self._obj_val = self.total_flow
             elif self._objective.value == Objective.MAX_CONCURRENT_FLOW.value:
                 self._obj_val = self.min_frac_flow
+            elif self._objective.value == Objective.MIN_MAX_LINK_UTIL.value:
+                self._obj_val = self.max_link_util
             else:
                 raise Exception(
                     "no support for other Objectives besides TOTAL_FLOW and MAX_CONCURRENT_FLOW"
@@ -149,3 +156,18 @@ class AbstractFormulation(object):
                 self._min_frac_flow = min(self._min_frac_flow, out_flow / d_k)
                 self.frac_flows[commod_key] = out_flow / d_k
         return self._min_frac_flow
+
+    @property
+    def max_link_util(self):
+        if not hasattr(self, "_max_link_util") or self.DEBUG:
+            self.link_vols = defaultdict(float)
+            for _, flow_list in self.sol_dict.items():
+                for edge, flow_vol in flow_list:
+                    self.link_vols[edge] += flow_vol
+            self.link_utils = {
+                (u, v): flow_vol / self.problem.G[u][v]["capacity"]
+                for (u, v), flow_vol in self.link_vols.items()
+            }
+            self._max_link_util = sorted(self.link_utils.values())[-1]
+
+        return self._max_link_util

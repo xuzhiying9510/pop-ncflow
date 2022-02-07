@@ -17,7 +17,7 @@ from lib.graph_utils import check_feasibility
 
 
 TOP_DIR = "pop-logs"
-OUTPUT_CSV_TEMPLATE = "pop-{}-{}-ncflow_nocross_pop_compare.csv"
+OUTPUT_CSV_TEMPLATE = "pop-{}-{}.csv"
 
 # Sweep topos and traffic matrices for that topo. For each combo, record the
 # runtime and total flow for each algorithm
@@ -74,8 +74,6 @@ def benchmark(
             for num_subproblems, split_method, split_fraction in product(
                 num_subproblems_sweep, split_methods_sweep, split_fraction_sweep
             ):
-                #if "poisson-high-intra" in tm_fname:
-                #    split_fraction = 0.75
                 run_dir = os.path.join(
                     TOP_DIR,
                     problem.name,
