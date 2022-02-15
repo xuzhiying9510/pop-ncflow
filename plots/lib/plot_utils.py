@@ -3,21 +3,23 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 
-plt.rcParams['pdf.fonttype'] = 42
-plt.rcParams['ps.fonttype'] = 42
+plt.rcParams["pdf.fonttype"] = 42
+plt.rcParams["ps.fonttype"] = 42
 sns.set_style("ticks")
 font = {
-    'font.family':'Roboto',
-    'font.size': 12,
+    "font.family": "Roboto",
+    "font.size": 12,
 }
 sns.set_style(font)
 paper_rc = {
-    'lines.linewidth': 3,
-    'lines.markersize': 10,
+    "lines.linewidth": 3,
+    "lines.markersize": 10,
 }
 sns.set_context("paper", font_scale=2, rc=paper_rc)
 sns.set_style({"axes.spines.right": False, "axes.spines.top": False})
 palette = sns.color_palette()
+
+CSVS_PATH = "../benchmarks/csvs"
 
 MARKER_NAMES_DICT = {
     "nc": "o",
