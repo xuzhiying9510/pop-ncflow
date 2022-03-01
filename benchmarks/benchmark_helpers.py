@@ -91,6 +91,15 @@ for key, vals in GROUPED_BY_HOLDOUT_PROBLEMS.items():
     GROUPED_BY_HOLDOUT_PROBLEMS[key] = sorted(vals)
 
 
+# This should be called when `many_problems` is False
+def get_problem(args):
+    topo_fname, tm_fname = GROUPED_BY_PROBLEMS[
+        (args.topo, args.tm_model, args.scale_factor)
+    ][args.slice]
+    return [(args.topo, topo_fname, tm_fname)]
+
+
+# This should be called when `many_problems` is True
 def get_problems(args):
     problems = []
     for (
@@ -108,7 +117,12 @@ def get_problems(args):
     return problems
 
 
-def get_args_and_problems(output_csv_template, additional_args=[]):
+def get_args_and_problems(
+    formatted_fname_template,
+    additional_args=[],
+    *,
+    many_problems=True,
+):
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
     parser.add_argument(
@@ -117,38 +131,69 @@ def get_args_and_problems(output_csv_template, additional_args=[]):
         choices=OBJ_STRS,
         required=True,
     )
-    parser.add_argument(
-        "--tm-models",
-        type=str,
-        choices=TM_MODELS + ["all"],
-        nargs="+",
-        default="all",
-    )
-    parser.add_argument(
-        "--topos",
-        type=str,
-        choices=PROBLEM_NAMES + ["all"],
-        nargs="+",
-        default="all",
-    )
-    parser.add_argument(
-        "--scale-factors",
-        type=lambda x: x if x == "all" else float(x),
-        choices=SCALE_FACTORS + ["all"],
-        nargs="+",
-        default="all",
-    )
-    parser.add_argument(
-        "--slices", type=int, choices=range(5), nargs="+", required=True
-    )
+    if many_problems:
+        parser.add_argument(
+            "--tm-models",
+            type=str,
+            choices=TM_MODELS + ["all"],
+            nargs="+",
+            default="all",
+        )
+        parser.add_argument(
+            "--topos",
+            type=str,
+            choices=PROBLEM_NAMES + ["all"],
+            nargs="+",
+            default="all",
+        )
+        parser.add_argument(
+            "--scale-factors",
+            type=lambda x: x if x == "all" else float(x),
+            choices=SCALE_FACTORS + ["all"],
+            nargs="+",
+            default="all",
+        )
+        parser.add_argument(
+            "--slices", type=int, choices=range(5), nargs="+", required=True
+        )
+    else:
+        parser.add_argument("--tm-model", type=str, choices=TM_MODELS, required=True)
+        parser.add_argument("--topo", type=str, choices=PROBLEM_NAMES, required=True)
+        parser.add_argument(
+            "--scale-factor", type=float, choices=SCALE_FACTORS, required=True
+        )
+        parser.add_argument("--slice", type=int, choices=range(5), required=True)
 
-    for additional_arg in additional_args:
-        name_or_flags, kwargs = additional_arg[0], additional_arg[1]
+    for add_arg in additional_args:
+        name_or_flags, kwargs = add_arg[0], add_arg[1]
         parser.add_argument(name_or_flags, **kwargs)
     args = parser.parse_args()
-    slice_str = "slice_" + "_".join(str(i) for i in args.slices)
-    output_csv = output_csv_template.format(args.obj, slice_str)
-    return args, output_csv, get_problems(args)
+    if many_problems:
+        slice_str = "slice_" + "_".join(str(i) for i in args.slices)
+        formatted_fname_substr = formatted_fname_template.format(args.obj, slice_str)
+        return args, formatted_fname_substr, get_problems(args)
+    else:
+        formatted_fname_substr = format_args_for_filename(
+            formatted_fname_template, args, additional_args
+        )
+        return args, formatted_fname_substr, get_problem(args)
+
+
+# Should only be used when `many_problems` is False
+def format_args_for_filename(template, args, additional_args):
+    slice_str = "slice_{}".format(args.slice)
+    additional_info_str = "problem_{}-tm_model_{}-scale_factor_{}".format(
+        args.topo, args.tm_model, args.scale_factor
+    )
+    args_as_dict = vars(args)
+    for add_arg in additional_args:
+        add_arg_formatted = add_arg[0][2:].replace("-", "_")
+        additional_info_str += "-{}_{}".format(
+            add_arg_formatted, args_as_dict[add_arg_formatted]
+        )
+    formatted_string = template.format(args.obj, slice_str + "_" + additional_info_str)
+
+    return formatted_string
 
 
 def print_(*args, file=None):

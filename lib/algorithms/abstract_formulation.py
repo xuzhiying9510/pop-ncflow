@@ -10,6 +10,7 @@ EPS = 1e-5
 
 OBJ_STRS = ["total_flow", "mcf", "min_max_link_util"]
 
+
 @unique
 class Objective(Enum):
     TOTAL_FLOW = 0
@@ -78,7 +79,8 @@ class AbstractFormulation(object):
     # Private helper methods #
     ##########################
     def _print(self, *args):
-        print(*args, file=self.out)
+        if self.DEBUG:
+            print(*args, file=self.out)
 
     def _extract_inds_from_var_name(self, varName, var_group_name="f"):
         match = re.match(r"{}\[(\d+),(\d+)\]".format(var_group_name), varName)
@@ -137,7 +139,7 @@ class AbstractFormulation(object):
 
     @property
     def total_flow(self):
-        if not hasattr(self, "_total_flow"):
+        if not hasattr(self, "_total_flow") or self.DEBUG:
             self._total_flow = 0.0
             for (_, (s_k, _, _)), flow_list in self.sol_dict.items():
                 self._total_flow += compute_in_or_out_flow(flow_list, 0, {s_k})

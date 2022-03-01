@@ -286,7 +286,7 @@ def transform_for_network_simplex(problem, vis=False):
 # FLOW, and prints out the bottleneck edges yielded by the solution
 def check_feasibility(problem, sol_dicts):
     print("Checking feasibility of solution")
-    obj_val = 0.0
+    total_flow = 0.0
     EPS = 1e-3
 
     G_copy = problem.G.copy()
@@ -296,13 +296,13 @@ def check_feasibility(problem, sol_dicts):
             flow_for_commod = assert_flow_conservation(flow_list, commod_key)
             # assert demand constraints
             assert flow_for_commod <= commod_key[-1][-1] + EPS
-            obj_val += flow_for_commod
+            total_flow += flow_for_commod
             for (u, v), flow_val in flow_list:
                 G_copy[u][v]["capacity"] -= flow_val
                 # if G_copy[u][v]['capacity'] < 0.0:
                 #     print(u, v, G_copy[u][v]['capacity'])
                 assert G_copy[u][v]["capacity"] > -EPS
-    print("Full Obj: " + str(obj_val))
+    print("Total Flow: " + str(total_flow))
     print("checking capacity constraints")
     edge_percent_cap_remaining = []
     for u, v, cap in G_copy.edges.data("capacity"):
@@ -314,4 +314,4 @@ def check_feasibility(problem, sol_dicts):
         edge_percent_cap_remaining.append((u, v, cap / problem.G[u][v]["capacity"]))
 
     bottleneck_edges = sorted(edge_percent_cap_remaining, key=lambda x: x[-1])
-    print("Bottleneck edges")
+    print("Top 5 Bottleneck edges", bottleneck_edges[:5])

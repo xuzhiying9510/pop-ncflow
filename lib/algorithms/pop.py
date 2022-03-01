@@ -1,10 +1,17 @@
 import os
 from collections import defaultdict
 
+from lib.graph_utils import compute_residual_problem
+
 from ..config import TOPOLOGIES_DIR
 from ..constants import NUM_CORES
-from ..partitioning.pop import (BaselineSplitter, GenericSplitter,
-                                RandomSplitter, RandomSplitter2, SmartSplitter)
+from ..partitioning.pop import (
+    BaselineSplitter,
+    GenericSplitter,
+    RandomSplitter,
+    RandomSplitter2,
+    SmartSplitter,
+)
 from ..runtime_utils import parallelized_rt
 from .abstract_formulation import Objective
 from .path_formulation import PathFormulation
@@ -112,20 +119,20 @@ class POP(PathFormulation):
         self._split_method = split_method
         self._split_fraction = split_fraction
 
-    def split_problems(self, problem):
+    def split_problems(self, problem, num_subproblems):
         splitter = None
         if self._split_method == "skewed":
-            splitter = BaselineSplitter(self._num_subproblems)
+            splitter = BaselineSplitter(num_subproblems)
         elif self._split_method == "random":
-            splitter = RandomSplitter(self._num_subproblems, self._split_fraction)
+            splitter = RandomSplitter(num_subproblems, self._split_fraction)
         elif self._split_method == "random2":
-            splitter = RandomSplitter2(self._num_subproblems, self._split_fraction)
+            splitter = RandomSplitter2(num_subproblems, self._split_fraction)
         elif self._split_method in ["tailored", "means", "covs", "cluster"]:
             if self._split_method == "tailored":
                 paths_dict = PathFormulation.read_paths_from_disk_or_compute(
                     problem, self._num_paths, self.edge_disjoint, self.dist_metric
                 )
-                splitter = SmartSplitter(self._num_subproblems, paths_dict)
+                splitter = SmartSplitter(num_subproblems, paths_dict)
             else:
                 pf_original = PathFormulation.get_pf_for_obj(
                     self._objective,
@@ -134,7 +141,7 @@ class POP(PathFormulation):
                     dist_metric=self.dist_metric,
                 )
                 splitter = GenericSplitter(
-                    self._num_subproblems,
+                    num_subproblems,
                     pf_original,
                     self._split_method,
                     self._split_fraction,
@@ -148,30 +155,79 @@ class POP(PathFormulation):
     # Override superclass methods #
     ###############################
 
-    def solve_subproblem(self, index):
-        pf = self._pfs[index]
-        subproblem = self._subproblem_list[index]
-        pf._paths_dict = self._paths_dict
-        pf.solve(
-            subproblem, num_threads=max(NUM_CORES // self._num_subproblems, 1),
-        )  # Force Gurobi to use a single thread
-        return (pf.runtime, pf.sol_dict)
-
     def solve(self, problem):
         self._problem = problem
-        self._subproblem_list = self.split_problems(problem)
+        # List of subproblems that have not been solved yet. Each time, we solve a subproblem,
+        # we'll remove an index from it
+        unsolved_subproblem_indices = list(range(self._num_subproblems))
+        # Initialize all the PF objects for each subproblem index. Even if the subproblem changes
+        # from one iteration to the next of the outer while loop, we'll keep the same PF object
         self._pfs = [
             PathFormulation.get_pf_for_obj(self._objective, self._num_paths)
-            for subproblem in self._subproblem_list
+            for _ in range(self._num_subproblems)
         ]
         self._paths_dict = self.get_paths(problem)
-        for pf, subproblem in zip(self._pfs, self._subproblem_list):
-            pf._paths_dict = self._paths_dict
-            pf.solve(subproblem)
+        # Initialize this to be a list of Nones; each time we solve a subproblem, we'll replace None
+        # with the solved subproblem
+        self._subproblem_list = [None for i in range(self._num_subproblems)]
+        unsolved_subproblems = self.split_problems(problem, self._num_subproblems)
+        leftover_capacities = defaultdict(float)
+
+        self.iter = 0
+        while len(unsolved_subproblem_indices) > 0:
+            self._print("WHILE LOOP, ITER {}".format(self.iter))
+            num_subproblems_in_iter = len(unsolved_subproblem_indices)
+            subproblems_to_remove = []
+            for i in unsolved_subproblem_indices:
+                self._print("SUBPROBLEM {}, ITER {}".format(i, self.iter))
+                subproblem = unsolved_subproblems[i]
+                pf = self._pfs[i]
+                pf._paths_dict = self._paths_dict
+                obj_val = pf.solve(
+                    subproblem,
+                    # Force Gurobi to use a single thread
+                    num_threads=max(NUM_CORES // num_subproblems_in_iter, 1),
+                )
+                if obj_val is not None:
+                    # If the subproblem was solved, then we'll replace the None in the list with
+                    # the solved subproblem
+                    self._subproblem_list[i] = subproblem
+                    # We also queue the index for removal from the list of unsolved subproblem indices
+                    subproblems_to_remove.append(i)
+                    # Finally, we compute the residual by subproblem subtracting the solved subproblem
+                    # from it
+                    residual_subproblem = compute_residual_problem(
+                        subproblem, pf.sol_dict
+                    )
+                    for u, v, cap in residual_subproblem.G.edges.data("capacity"):
+                        leftover_capacities[(u, v)] += cap
+
+                else:
+                    self._print(
+                        "SUBPROBLEM {}, ITER {} is infeasible".format(i, self.iter)
+                    )
+            for i in subproblems_to_remove:
+                unsolved_subproblem_indices.remove(i)
+            self.iter += 1
+            if len(unsolved_subproblem_indices) == 0:
+                break
+            # Add the leftover capacities to the remaining subproblems
+            for (u, v), extra_cap in leftover_capacities.items():
+                extra_cap_per_remaining_subproblem = extra_cap / len(
+                    unsolved_subproblem_indices
+                )
+                for i in unsolved_subproblem_indices:
+                    unsolved_subproblems[i].G[u][v][
+                        "capacity"
+                    ] += extra_cap_per_remaining_subproblem
+
+        assert len(unsolved_subproblem_indices) == 0
+        assert len([p for p in self._subproblem_list if p is None]) == 0
 
     @property
     def sol_dict(self):
-        if not hasattr(self, "_sol_dict"):
+        self._print("NUM ITERS", self.iter)
+        if not hasattr(self, "_sol_dict") or self.DEBUG:
             sol_dicts = [pf.sol_dict for pf in self._pfs]
             merged_sol_dict = defaultdict(list)
             for sol_dict in sol_dicts:

@@ -249,10 +249,10 @@ class PathFormulation(AbstractFormulation):
     # Override superclass methods #
     ###############################
 
-    def solve(self, problem):
+    def solve(self, problem, num_threads=NUM_CORES):
         self._problem = problem
         self._solver = self._construct_lp([])
-        return self._solver.solve_lp(num_threads=NUM_CORES)
+        return self._solver.solve_lp(num_threads=num_threads)
 
     def pre_solve(self, problem=None):
         if problem is None:
