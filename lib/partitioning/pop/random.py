@@ -28,7 +28,7 @@ class RandomSplitter(AbstractPOPSplitter):
             # until all entities have been assigned
             while len(assigned_sps_list) < num_subentities:
                 num_to_add = min(
-                    [num_subentities - len(assigned_sps_list), self._num_subproblems]
+                    num_subentities - len(assigned_sps_list), self._num_subproblems
                 )
                 randperm = np.random.permutation(np.arange(self._num_subproblems))
                 assigned_sps_list += list(randperm[:num_to_add])

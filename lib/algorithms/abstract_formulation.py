@@ -8,7 +8,7 @@ import sys
 EPS = 1e-5
 
 
-OBJ_STRS = ["total_flow", "mcf", "min_max_link_util"]
+OBJ_STRS = ["total_flow", "mcf", "min_max_link_util", "compute_demand_scale_factor"]
 
 
 @unique
@@ -27,6 +27,8 @@ class Objective(Enum):
             return cls.MAX_CONCURRENT_FLOW
         elif obj_str == "min_max_link_util":
             return cls.MIN_MAX_LINK_UTIL
+        elif obj_str == "compute_demand_scale_factor":
+            return cls.COMPUTE_DEMAND_SCALE_FACTOR
         else:
             raise Exception("{} not supported".format(obj_str))
 
@@ -129,11 +131,16 @@ class AbstractFormulation(object):
                 self._obj_val = self.total_flow
             elif self._objective.value == Objective.MAX_CONCURRENT_FLOW.value:
                 self._obj_val = self.min_frac_flow
-            elif self._objective.value == Objective.MIN_MAX_LINK_UTIL.value:
+            elif (
+                (self._objective.value == Objective.MIN_MAX_LINK_UTIL.value)
+                or self._objective.value == Objective.COMPUTE_DEMAND_SCALE_FACTOR.value
+            ):
                 self._obj_val = self.max_link_util
             else:
                 raise Exception(
-                    "no support for other Objectives besides TOTAL_FLOW and MAX_CONCURRENT_FLOW"
+                    "no support for other Objectives besides {}".format(
+                        ", ".join(OBJ_STRS)
+                    )
                 )
         return self._obj_val
 

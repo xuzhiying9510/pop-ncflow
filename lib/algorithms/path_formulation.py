@@ -127,7 +127,7 @@ class PathFormulation(AbstractFormulation):
                     vtype=GRB.CONTINUOUS, lb=0.0, ub=1.0, name="z"
                 )
             else:
-                # max link util can be large
+                # max link util can exceed 1.0
                 max_link_util_var = m.addVar(vtype=GRB.CONTINUOUS, lb=0.0, name="z")
 
             m.setObjective(max_link_util_var, GRB.MINIMIZE)
