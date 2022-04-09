@@ -7,6 +7,10 @@ import json
 import sys
 import os
 
+sys.path.append("..")
+
+from lib.graph_utils import add_bi_edge
+
 OUTPUT_DIR = "../topologies"
 
 
@@ -24,14 +28,6 @@ def read_graph_json(fname):
 def write_graph_json(fname, G):
     with open(fname, "w") as f:
         json.dump(json_graph.node_link_data(G), f)
-
-
-def add_bi_edge(G, src, dest, capacity=None):
-    G.add_edge(src, dest)
-    G.add_edge(dest, src)
-    if capacity:
-        G[src][dest]["capacity"] = capacity
-        G[dest][src]["capacity"] = capacity
 
 
 ################

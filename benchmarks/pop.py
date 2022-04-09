@@ -11,7 +11,7 @@ import sys
 sys.path.append("..")
 
 from lib.constants import NUM_CORES
-from lib.algorithms import POP, Objective
+from lib.algorithms import POP, Objective, PathFormulation, TEAVAR
 from lib.problem import Problem
 from lib.graph_utils import check_feasibility
 
@@ -44,14 +44,21 @@ HEADERS = [
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
 
 
-def benchmark(
-    problems,
-    output_csv,
-    obj,
-    num_subproblems_sweep,
-    split_methods_sweep,
-    split_fraction_sweep,
-):
+def benchmark(problems, output_csv, args):
+    obj = args.obj
+    algo_cls = args.algo_cls
+    num_subproblems_sweep = args.num_subproblems
+    split_methods_sweep = args.split_methods
+    split_fraction_sweep = args.split_fractions
+    addl_kwargs = (
+        {
+            "availability": 0.99,
+            "failure_scenarios": [[(0, 1)]],
+            "failure_probs": [0.9],
+        }
+        if algo_cls == TEAVAR
+        else {}
+    )
 
     with open(output_csv, "a") as results:
         print_(",".join(HEADERS), file=results)
@@ -125,10 +132,12 @@ def benchmark(
                             num_subproblems=num_subproblems,
                             split_method=split_method,
                             split_fraction=split_fraction,
+                            algo_cls=algo_cls,
                             num_paths=num_paths,
                             edge_disjoint=edge_disjoint,
                             dist_metric=dist_metric,
                             out=log,
+                            **addl_kwargs
                         )
                         pop.solve(problem)
                         sol_dict = pop.sol_dict
@@ -210,6 +219,17 @@ if __name__ == "__main__":
                     "help": "Split fractions to use",
                 },
             ],
+            [
+                "--algo-cls",
+                {
+                    "type": lambda x: PathFormulation
+                    if x == "PathFormulation"
+                    else TEAVAR,
+                    "choices": ["PathFormulation", "TEAVAR"],
+                    "default": ["PathFormulation"],
+                    "help": "which underlying algorithm to benchmark with POP",
+                },
+            ],
         ],
     )
 
@@ -218,11 +238,4 @@ if __name__ == "__main__":
         for problem in problems:
             print(problem)
     else:
-        benchmark(
-            problems,
-            output_csv,
-            args.obj,
-            args.num_subproblems,
-            args.split_methods,
-            args.split_fractions,
-        )
+        benchmark(problems, output_csv, args)

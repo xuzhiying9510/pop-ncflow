@@ -10,7 +10,7 @@ sys.path.append("../..")
 
 from benchmark_helpers import PATH_FORM_HYPERPARAMS
 from lib.algorithms.abstract_formulation import OBJ_STRS
-from lib.algorithms import POP, Objective
+from lib.algorithms import POP, Objective, PathFormulation, TEAVAR
 from lib.problem import Problem
 from lib.graph_utils import check_feasibility
 
@@ -22,6 +22,16 @@ def run_pop(args):
     num_subproblems = args.num_subproblems
     split_method = args.split_method
     split_fraction = args.split_fraction
+    algo_cls = PathFormulation if args.algo_cls == "PathFormulation" else TEAVAR
+    addl_kwargs = (
+        {
+            "availability": 0.99,
+            "failure_scenarios": [[(0, 1)]],
+            "failure_probs": [0.9],
+        }
+        if algo_cls == TEAVAR
+        else {}
+    )
 
     problem = Problem.from_file(topo_fname, tm_fname)
     print(problem.name, tm_fname)
@@ -33,10 +43,12 @@ def run_pop(args):
         num_subproblems=num_subproblems,
         split_method=split_method,
         split_fraction=split_fraction,
+        algo_cls=algo_cls,
         num_paths=num_paths,
         edge_disjoint=edge_disjoint,
         dist_metric=dist_metric,
         DEBUG=True,
+        **addl_kwargs
     )
     pop.solve(problem)
     print("{}: {}".format(obj, pop.obj_val))
@@ -67,5 +79,8 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument("--split_fraction", type=float, required=True)
+    parser.add_argument(
+        "--algo_cls", type=str, choices=["PathFormulation", "TEAVAR"], required=True
+    )
     args = parser.parse_args()
     run_pop(args)

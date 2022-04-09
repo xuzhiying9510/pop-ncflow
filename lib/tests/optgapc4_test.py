@@ -1,5 +1,5 @@
 from .abstract_test import AbstractTest
-from ..problems import OptGap4
+from ..problems import OptGapC4
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
@@ -10,7 +10,7 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 class OptGap4Test(AbstractTest):
     def __init__(self):
         super().__init__()
-        self.problem = OptGap4()
+        self.problem = OptGapC4()
 
     @property
     def name(self):

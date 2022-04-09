@@ -33,32 +33,35 @@ MARKER_NAMES_DICT = {
 
 
 LINE_STYLES_DICT = {
-    "nc": "-",
-    "pf": "--",
-    "smore": "-.",
-    "fe": ":",
-    "fp": "--",
-    "pfws": "-.",
-    "pf-oracle": ":",
+    "nc": "solid",
+    "pop": "dotted",
+    "pf": "dashed",
+    "smore": "dashdot",
+    "fe": (0, (5, 10)),  # loosely dashed
+    "fp": (0, (3, 5, 1, 5, 1, 5)),  # dashdotdotted
+    "pfws": "dotted",
+    "pf-oracle": "dashed",
 }
 
 COLOR_NAMES_DICT = {
     "nc": palette[0],
-    "pf": palette[1],
-    "smore": palette[2],
-    "fe": palette[3],
-    "fp": palette[4],
-    "pfws": palette[9],
-    "pf-oracle": palette[6],
+    "pop": palette[1],
+    "pf": palette[2],
+    "smore": palette[3],
+    "fe": palette[4],
+    "fp": palette[5],
+    "pfws": palette[6],
+    "pf-oracle": palette[7],
 }
 
 LABEL_NAMES_DICT = {
     "nc": "NCFlow",
+    "pop": "POP, $k=16$",
     "pf": "$\mathrm{PF}_4$",
     "pfws": "$\mathrm{PF}_{4{\sf w}}$",
     "pf-oracle": "Instant $\mathrm{PF}_4$",
     "smore": "SMORE",
-    #'fe': 'Fleischer-Edge, $\epsilon = 0.5$',
+    "fe": "Fleischer-Edge, $\epsilon = 0.5$",
     "fe": "Fleischer's Algorithm",
     "fp": "Fleischer-Path, $\epsilon = 0.5$",
 }
@@ -158,6 +161,77 @@ def sort_and_set_index(df, drop=False):
             by=["problem", "tm_model", "scale_factor", "traffic_seed"]
         )
     ).set_index(["problem", "tm_model", "traffic_seed", "scale_factor"])
+
+
+def per_iter_to_nc_df(per_iter_fname):
+    per_iter_df = filter_by_hyperparams(per_iter_fname).drop(
+        columns=[
+            "num_nodes",
+            "num_edges",
+            "num_commodities",
+            "partition_runtime",
+            "size_of_largest_partition",
+            "iteration",
+            "r1_runtime",
+            "r2_runtime",
+            "recon_runtime",
+            "r3_runtime",
+            "kirchoffs_runtime",
+        ]
+    )
+    nc_iterative_df = per_iter_df.groupby(
+        [
+            "problem",
+            "tm_model",
+            "traffic_seed",
+            "scale_factor",
+            "total_demand",
+            "algo",
+            "clustering_algo",
+            "num_partitions",
+            "num_paths",
+            "edge_disjoint",
+            "dist_metric",
+        ]
+    ).sum()
+
+    return sort_and_set_index(nc_iterative_df)
+
+
+def get_ratio_df(other_df, baseline_df, target_col, suffix):
+    join_df = baseline_df.join(
+        other_df, how="inner", lsuffix="_baseline", rsuffix=suffix
+    ).reset_index()
+    results = []
+    for _, row in join_df.iterrows():
+        flow_ratio = (
+            row["{}{}".format(target_col, suffix)]
+            / row["{}_baseline".format(target_col)]
+        )
+        speedup_ratio = row["runtime_baseline"] / row["runtime{}".format(suffix)]
+        results.append(
+            [
+                row["problem"],
+                row["tm_model"],
+                row["traffic_seed"],
+                row["scale_factor"],
+                flow_ratio,
+                speedup_ratio,
+            ]
+        )
+
+    df = pd.DataFrame(
+        columns=[
+            "problem",
+            "tm_model",
+            "traffic_seed",
+            "scale_factor",
+            "flow_ratio",
+            "speedup_ratio",
+        ],
+        data=results,
+    )
+    return df
 
 
 POISSON_HIGH_INTRA = set(

@@ -26,6 +26,7 @@ class POP(PathFormulation):
         num_subproblems,
         split_method,
         split_fraction,
+        algo_cls,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -36,6 +37,7 @@ class POP(PathFormulation):
             num_subproblems=num_subproblems,
             split_method=split_method,
             split_fraction=split_fraction,
+            algo_cls=algo_cls,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -50,6 +52,7 @@ class POP(PathFormulation):
         num_subproblems,
         split_method,
         split_fraction,
+        algo_cls,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -60,6 +63,7 @@ class POP(PathFormulation):
             num_subproblems=num_subproblems,
             split_method=split_method,
             split_fraction=split_fraction,
+            algo_cls=algo_cls,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -74,6 +78,7 @@ class POP(PathFormulation):
         num_subproblems,
         split_method,
         split_fraction,
+        algo_cls,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -84,6 +89,7 @@ class POP(PathFormulation):
             num_subproblems=num_subproblems,
             split_method=split_method,
             split_fraction=split_fraction,
+            algo_cls=algo_cls,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -99,12 +105,14 @@ class POP(PathFormulation):
         num_subproblems,
         split_method,
         split_fraction,
+        algo_cls,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
         DEBUG=False,
         VERBOSE=False,
         out=None,
+        **addl_kwargs,
     ):
         super().__init__(
             objective=objective,
@@ -118,6 +126,8 @@ class POP(PathFormulation):
         self._num_subproblems = num_subproblems
         self._split_method = split_method
         self._split_fraction = split_fraction
+        self._algo_cls = algo_cls
+        self._addl_kwargs = addl_kwargs
 
     def split_problems(self, problem, num_subproblems):
         splitter = None
@@ -162,8 +172,15 @@ class POP(PathFormulation):
         unsolved_subproblem_indices = list(range(self._num_subproblems))
         # Initialize all the PF objects for each subproblem index. Even if the subproblem changes
         # from one iteration to the next of the outer while loop, we'll keep the same PF object
-        self._pfs = [
-            PathFormulation.get_pf_for_obj(self._objective, self._num_paths)
+
+        self._algos = [
+            self._algo_cls(
+                objective=self._objective,
+                num_paths=self._num_paths,
+                DEBUG=self.DEBUG,
+                VERBOSE=self.VERBOSE,
+                **self._addl_kwargs,
+            )
             for _ in range(self._num_subproblems)
         ]
         self._paths_dict = self.get_paths(problem)
@@ -181,9 +198,12 @@ class POP(PathFormulation):
             for i in unsolved_subproblem_indices:
                 self._print("SUBPROBLEM {}, ITER {}".format(i, self.iter))
                 subproblem = unsolved_subproblems[i]
-                pf = self._pfs[i]
-                pf._paths_dict = self._paths_dict
-                obj_val = pf.solve(
+                print(
+                    "SUBPROBLEM {}, total demand: {}".format(i, subproblem.total_demand)
+                )
+                algo = self._algos[i]
+                algo._paths_dict = self._paths_dict
+                obj_val = algo.solve(
                     subproblem,
                     # Force Gurobi to use a single thread
                     num_threads=max(NUM_CORES // num_subproblems_in_iter, 1),
@@ -197,7 +217,7 @@ class POP(PathFormulation):
                     # Finally, we compute the residual by subproblem subtracting the solved subproblem
                     # from it
                     residual_subproblem = compute_residual_problem(
-                        subproblem, pf.sol_dict
+                        subproblem, algo.sol_dict
                     )
                     for u, v, cap in residual_subproblem.G.edges.data("capacity"):
                         leftover_capacities[(u, v)] += cap
@@ -226,9 +246,8 @@ class POP(PathFormulation):
 
     @property
     def sol_dict(self):
-        self._print("NUM ITERS", self.iter)
-        if not hasattr(self, "_sol_dict") or self.DEBUG:
-            sol_dicts = [pf.sol_dict for pf in self._pfs]
+        if not hasattr(self, "_sol_dict"):
+            sol_dicts = [pf.sol_dict for pf in self._algos]
             merged_sol_dict = defaultdict(list)
             for sol_dict in sol_dicts:
                 for (_, (src, target, _)), flow_list in sol_dict.items():
@@ -247,8 +266,8 @@ class POP(PathFormulation):
         )
 
     def runtime_est(self, num_threads):
-        return parallelized_rt([pf.runtime for pf in self._pfs], num_threads)
+        return parallelized_rt([pf.runtime for pf in self._algos], num_threads)
 
     @property
     def runtime(self):
-        return sum([pf.runtime for pf in self._pfs])
+        return sum([pf.runtime for pf in self._algos])

@@ -5,4 +5,5 @@ from .min_max_flow_on_edge import MinMaxFlowOnEdgeOverCap
 from .cspf import CSPF
 from .pop import POP
 from .smore import SMORE
+from .teavar import TEAVAR
 from .ncflow import *

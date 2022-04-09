@@ -18,6 +18,7 @@ class Objective(Enum):
     MAX_CONCURRENT_FLOW = 2
     MIN_MAX_LINK_UTIL = 3
     COMPUTE_DEMAND_SCALE_FACTOR = 4
+    TEAVAR = 5
 
     @classmethod
     def get_obj_from_str(cls, obj_str):
@@ -29,6 +30,8 @@ class Objective(Enum):
             return cls.MIN_MAX_LINK_UTIL
         elif obj_str == "compute_demand_scale_factor":
             return cls.COMPUTE_DEMAND_SCALE_FACTOR
+        elif obj_str == "teavar":
+            return cls.TEAVAR
         else:
             raise Exception("{} not supported".format(obj_str))
 

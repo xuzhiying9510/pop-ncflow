@@ -6,6 +6,14 @@ from collections import defaultdict
 EPS = 1e-4
 
 
+def add_bi_edge(G, src, dest, capacity=None):
+    G.add_edge(src, dest)
+    G.add_edge(dest, src)
+    if capacity:
+        G[src][dest]["capacity"] = capacity
+        G[dest][src]["capacity"] = capacity
+
+
 def assert_flow_conservation(flow_list, commod_key):
     if len(flow_list) == 0:
         return 0.0
@@ -295,7 +303,10 @@ def check_feasibility(problem, sol_dicts):
         for commod_key, flow_list in sol_dict.items():
             flow_for_commod = assert_flow_conservation(flow_list, commod_key)
             # assert demand constraints
-            assert flow_for_commod <= commod_key[-1][-1] + EPS
+            try:
+                assert flow_for_commod <= commod_key[-1][-1] + EPS
+            except:
+                print("Flow for commodity {} is {}".format(commod_key, flow_for_commod))
             total_flow += flow_for_commod
             for (u, v), flow_val in flow_list:
                 G_copy[u][v]["capacity"] -= flow_val

@@ -1,9 +1,10 @@
 import os
 import numpy as np
 import networkx as nx
-from .config import TOPOLOGIES_DIR, TM_DIR
+
+from lib.graph_utils import add_bi_edge
+from .config import TOPOLOGIES_DIR
 from .problem import Problem
-from .traffic_matrix import TrafficMatrix
 
 ################
 # Topology Zoo #
@@ -187,36 +188,6 @@ class Recon3(Problem):
         return "recon3"
 
 
-class OptGapC3(Problem):
-    def __init__(self):
-        G = nx.DiGraph()
-        G.add_node(0, label="0", pos=(-2, 1))
-        G.add_node(1, label="1", pos=(-1, 1))
-        G.add_node(2, label="2", pos=(-1.5, -1))
-        G.add_node(3, label="3", pos=(0, 0))
-        G.add_node(4, label="4", pos=(1, 0))
-        G.add_node(5, label="5", pos=(2, 1))
-        G.add_node(6, label="6", pos=(2, -1))
-
-        G.add_edge(0, 1, capacity=1)
-        G.add_edge(1, 3, capacity=100)
-        G.add_edge(2, 3, capacity=100)
-        G.add_edge(3, 4, capacity=8)
-        G.add_edge(4, 5, capacity=100)
-        G.add_edge(4, 6, capacity=100)
-
-        num_nodes = len(G.nodes)
-        traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
-        traffic_matrix[0, 5] = 10
-        traffic_matrix[2, 6] = 10
-
-        super().__init__(G, traffic_matrix)
-
-    @property
-    def name(self):
-        return "optgapc3"
-
-
 class OptGapC1(Problem):
     def __init__(self):
         G = nx.DiGraph()
@@ -227,13 +198,13 @@ class OptGapC1(Problem):
         G.add_node(4, label="4", pos=(0, -1))
         G.add_node(5, label="5", pos=(1, 0))
 
-        G.add_edge(0, 1, capacity=5)
-        G.add_edge(0, 2, capacity=2)
-        G.add_edge(1, 2, capacity=4)
-        G.add_edge(1, 3, capacity=100)
-        G.add_edge(2, 4, capacity=100)
-        G.add_edge(3, 5, capacity=3)
-        G.add_edge(4, 5, capacity=4)
+        add_bi_edge(G, 0, 1, capacity=5)
+        add_bi_edge(G, 0, 2, capacity=2)
+        add_bi_edge(G, 1, 2, capacity=4)
+        add_bi_edge(G, 1, 3, capacity=100)
+        add_bi_edge(G, 2, 4, capacity=100)
+        add_bi_edge(G, 3, 5, capacity=3)
+        add_bi_edge(G, 4, 5, capacity=4)
 
         num_nodes = len(G.nodes)
         traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
@@ -258,14 +229,14 @@ class OptGapC2(Problem):
         G.add_node(6, label="6", pos=(1, 0))
         G.add_node(7, label="7", pos=(1.5, 0))
 
-        G.add_edge(0, 1, capacity=100)
-        G.add_edge(1, 2, capacity=100)
-        G.add_edge(1, 4, capacity=100)
-        G.add_edge(2, 3, capacity=3)
-        G.add_edge(4, 5, capacity=5)
-        G.add_edge(3, 6, capacity=100)
-        G.add_edge(5, 6, capacity=100)
-        G.add_edge(6, 7, capacity=100)
+        add_bi_edge(G, 0, 1, capacity=100)
+        add_bi_edge(G, 1, 2, capacity=100)
+        add_bi_edge(G, 1, 4, capacity=100)
+        add_bi_edge(G, 2, 3, capacity=3)
+        add_bi_edge(G, 4, 5, capacity=5)
+        add_bi_edge(G, 3, 6, capacity=100)
+        add_bi_edge(G, 5, 6, capacity=100)
+        add_bi_edge(G, 6, 7, capacity=100)
 
         num_nodes = len(G.nodes)
         traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
@@ -278,7 +249,37 @@ class OptGapC2(Problem):
         return "optgapc2"
 
 
-class OptGap4(Problem):
+class OptGapC3(Problem):
+    def __init__(self):
+        G = nx.DiGraph()
+        G.add_node(0, label="0", pos=(-2, 1))
+        G.add_node(1, label="1", pos=(-1, 1))
+        G.add_node(2, label="2", pos=(-1.5, -1))
+        G.add_node(3, label="3", pos=(0, 0))
+        G.add_node(4, label="4", pos=(1, 0))
+        G.add_node(5, label="5", pos=(2, 1))
+        G.add_node(6, label="6", pos=(2, -1))
+
+        add_bi_edge(G, 0, 1, capacity=1)
+        add_bi_edge(G, 1, 3, capacity=100)
+        add_bi_edge(G, 2, 3, capacity=100)
+        add_bi_edge(G, 3, 4, capacity=8)
+        add_bi_edge(G, 4, 5, capacity=100)
+        add_bi_edge(G, 4, 6, capacity=100)
+
+        num_nodes = len(G.nodes)
+        traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
+        traffic_matrix[0, 5] = 10
+        traffic_matrix[2, 6] = 10
+
+        super().__init__(G, traffic_matrix)
+
+    @property
+    def name(self):
+        return "optgapc3"
+
+
+class OptGapC4(Problem):
     def __init__(self):
         G = nx.DiGraph()
         G.add_node(0, label="0", pos=(-2, 1))
@@ -288,19 +289,13 @@ class OptGap4(Problem):
         G.add_node(4, label="4", pos=(0, 0))
         G.add_node(5, label="5", pos=(1, 0.5))
 
-        G.add_edge(0, 1, capacity=100)
-        G.add_edge(1, 3, capacity=10)
-        G.add_edge(2, 3, capacity=10)
-        G.add_edge(2, 4, capacity=10)
-        G.add_edge(3, 5, capacity=1)
-        G.add_edge(4, 5, capacity=1)
-
-        G.add_edge(1, 0, capacity=100)
-        G.add_edge(3, 1, capacity=10)
-        G.add_edge(3, 2, capacity=10)
-        G.add_edge(4, 2, capacity=10)
-        G.add_edge(5, 3, capacity=1)
-        G.add_edge(5, 4, capacity=1)
+        add_bi_edge(G, 0, 1, capacity=100)
+        add_bi_edge(G, 0, 2, capacity=0.00001)
+        add_bi_edge(G, 1, 3, capacity=10)
+        add_bi_edge(G, 2, 3, capacity=10)
+        add_bi_edge(G, 2, 4, capacity=10)
+        add_bi_edge(G, 3, 5, capacity=1)
+        add_bi_edge(G, 4, 5, capacity=1)
 
         num_nodes = len(G.nodes)
         traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
@@ -310,7 +305,49 @@ class OptGap4(Problem):
 
     @property
     def name(self):
-        return "optgap4"
+        return "optgapc4"
+
+
+class OptGapC5(Problem):
+    def __init__(self):
+        G = nx.DiGraph()
+        G.add_node(0, label="0", pos=(-2, 1))
+        G.add_node(1, label="1", pos=(-1, 1))
+        G.add_node(2, label="2", pos=(-1.5, -1))
+        G.add_node(3, label="3", pos=(0, 0))
+        G.add_node(4, label="4", pos=(1, 0))
+        G.add_node(5, label="5", pos=(2, 1))
+        G.add_node(6, label="6", pos=(2, -1))
+
+        G.add_node(7, label="7", pos=(2, -1))
+        G.add_node(8, label="8", pos=(2, -1))
+        G.add_node(9, label="9", pos=(2, -1))
+        G.add_node(10, label="10", pos=(2, -1))
+
+        add_bi_edge(G, 0, 1, capacity=1)
+        add_bi_edge(G, 1, 3, capacity=100)
+        add_bi_edge(G, 2, 3, capacity=100)
+        add_bi_edge(G, 3, 4, capacity=10)
+        add_bi_edge(G, 4, 5, capacity=100)
+        add_bi_edge(G, 4, 6, capacity=100)
+
+        add_bi_edge(G, 7, 3, capacity=100)
+        add_bi_edge(G, 9, 3, capacity=100)
+        add_bi_edge(G, 4, 8, capacity=100)
+        add_bi_edge(G, 4, 10, capacity=100)
+
+        num_nodes = len(G.nodes)
+        traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
+        traffic_matrix[0, 5] = 10
+        traffic_matrix[2, 6] = 10
+        traffic_matrix[7, 8] = 10
+        traffic_matrix[9, 10] = 10
+
+        super().__init__(G, traffic_matrix)
+
+    @property
+    def name(self):
+        return "optgapc5"
 
 
 class WeNeedToFixThis(Problem):
@@ -495,8 +532,16 @@ class TwoSrcsFromMetaNodeProblem(Problem):
 
 PROBLEM_ARGS = {
     "cogentco": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 8e9, "const_factor": 5.75e-8,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e2, "const_factor": 1.05e-3,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 8e9,
+            "const_factor": 5.75e-8,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e2,
+            "const_factor": 1.05e-3,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.06},
@@ -509,8 +554,16 @@ PROBLEM_ARGS = {
         "fname": "Cogentco.graphml",
     },
     "colt": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 1.35e8, "const_factor": 2.4e-6,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 9.5e-5,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 1.35e8,
+            "const_factor": 2.4e-6,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 9.5e-5,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.065},
@@ -523,8 +576,16 @@ PROBLEM_ARGS = {
         "fname": "Colt.graphml",
     },
     "delta": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 2.05e6, "const_factor": 2.5e-4,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 2.85e-4,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 2.05e6,
+            "const_factor": 2.5e-4,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 2.85e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.25},
@@ -537,8 +598,16 @@ PROBLEM_ARGS = {
         "fname": "Deltacom.graphml",
     },
     "dial": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 2e12, "const_factor": 3.0e-10,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 2.75e-4,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 2e12,
+            "const_factor": 3.0e-10,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 2.75e-4,
+        },
         "behnaz": {},
         "uniform": {"max_demand": 0.125},
         "gravity": {"total_demand": 1150.0, "random": True},
@@ -550,8 +619,16 @@ PROBLEM_ARGS = {
         "fname": "DialtelecomCz.graphml",
     },
     "gtsce": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 2e8, "const_factor": 2.25e-6,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 8.5e-5,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 2e8,
+            "const_factor": 2.25e-6,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 8.5e-5,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.05},
@@ -564,8 +641,16 @@ PROBLEM_ARGS = {
         "fname": "GtsCe.graphml",
     },
     "interoute": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 2.5e7, "const_factor": 2.30e-5,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 2.7e-4,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 2.5e7,
+            "const_factor": 2.30e-5,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 2.7e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.22},
@@ -578,8 +663,16 @@ PROBLEM_ARGS = {
         "fname": "Interoute.graphml",
     },
     "ion": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 7e9, "const_factor": 9.0e-8,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 2.6e-4,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 7e9,
+            "const_factor": 9.0e-8,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 2.6e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.15},
@@ -592,8 +685,16 @@ PROBLEM_ARGS = {
         "fname": "Ion.graphml",
     },
     "kdl": {
-        "poisson-high-intra": {"decay": 0.35, "lam": 8e9, "const_factor": 4.3e-9,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e4, "const_factor": 3.3e-6,},
+        "poisson-high-intra": {
+            "decay": 0.35,
+            "lam": 8e9,
+            "const_factor": 4.3e-9,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e4,
+            "const_factor": 3.3e-6,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.005},
@@ -606,8 +707,16 @@ PROBLEM_ARGS = {
         "fname": "Kdl.graphml",
     },
     "tata": {
-        "poisson-high-intra": {"decay": 0.1, "lam": 1e9, "const_factor": 5.5e-7,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 1.8e-4,},
+        "poisson-high-intra": {
+            "decay": 0.1,
+            "lam": 1e9,
+            "const_factor": 5.5e-7,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 1.8e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.1},
@@ -620,8 +729,16 @@ PROBLEM_ARGS = {
         "fname": "TataNld.graphml",
     },
     "uninett": {
-        "poisson-high-intra": {"decay": 1e-3, "lam": 2e14, "const_factor": 5.0e-10,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 4.15e-4,},
+        "poisson-high-intra": {
+            "decay": 1e-3,
+            "lam": 2e14,
+            "const_factor": 5.0e-10,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 4.15e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.46},
@@ -634,8 +751,16 @@ PROBLEM_ARGS = {
         "fname": "Uninett2010.graphml",
     },
     "us-carrier": {
-        "poisson-high-intra": {"decay": 0.25, "lam": 3.5e6, "const_factor": 3.0e-5,},
-        "poisson-high-inter": {"decay": 0.9, "lam": 1e3, "const_factor": 1.25e-4,},
+        "poisson-high-intra": {
+            "decay": 0.25,
+            "lam": 3.5e6,
+            "const_factor": 3.0e-5,
+        },
+        "poisson-high-inter": {
+            "decay": 0.9,
+            "lam": 1e3,
+            "const_factor": 1.25e-4,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 0.05},
@@ -648,8 +773,16 @@ PROBLEM_ARGS = {
         "fname": "UsCarrier.graphml",
     },
     "erdos-renyi-1260231677": {
-        "poisson-high-intra": {"decay": 0.001, "lam": 5e13, "const_factor": 2e-9,},
-        "poisson-high-inter": {"decay": 0.75, "lam": 1e3, "const_factor": 1.75e-3,},
+        "poisson-high-intra": {
+            "decay": 0.001,
+            "lam": 5e13,
+            "const_factor": 2e-9,
+        },
+        "poisson-high-inter": {
+            "decay": 0.75,
+            "lam": 1e3,
+            "const_factor": 1.75e-3,
+        },
         "exponential": {},
         "behnaz": {},
         "uniform": {"max_demand": 1.0},

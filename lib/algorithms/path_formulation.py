@@ -91,8 +91,8 @@ class PathFormulation(AbstractFormulation):
         *,
         objective,
         num_paths,
-        edge_disjoint,
-        dist_metric,
+        edge_disjoint=True,
+        dist_metric="inv-cap",
         DEBUG=False,
         VERBOSE=False,
         out=None
@@ -109,7 +109,8 @@ class PathFormulation(AbstractFormulation):
         self.dist_metric = dist_metric
 
     # flow caps = [((k1, ..., kn), f1), ...]
-    def _construct_path_lp(self, G, edge_to_paths, num_total_paths, sat_flows):
+    def _construct_path_lp(self, G, edge_to_paths, num_total_paths, sat_flows=[]):
+        self._print("Constructing Path LP")
         m = Model("max-flow: path formulation")
 
         # Create variables: one for each path
@@ -292,7 +293,6 @@ class PathFormulation(AbstractFormulation):
 
     def _construct_lp(self, sat_flows=[]):
         edge_to_paths, num_paths = self.pre_solve()
-        self._print("Constructing Path LP")
         return self._construct_path_lp(
             self._problem.G, edge_to_paths, num_paths, sat_flows
         )
