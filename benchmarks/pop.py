@@ -7,6 +7,7 @@ from itertools import product
 from benchmark_helpers import get_args_and_problems, print_, PATH_FORM_HYPERPARAMS
 
 import sys
+from benchmarks.benchmark_helpers import AlgoClsAction
 
 sys.path.append("..")
 
@@ -222,11 +223,10 @@ if __name__ == "__main__":
             [
                 "--algo-cls",
                 {
-                    "type": lambda x: PathFormulation
-                    if x == "PathFormulation"
-                    else TEAVAR,
+                    "type": str,
                     "choices": ["PathFormulation", "TEAVAR"],
                     "default": ["PathFormulation"],
+                    "action": AlgoClsAction,
                     "help": "which underlying algorithm to benchmark with POP",
                 },
             ],

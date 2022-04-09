@@ -3,11 +3,11 @@ from glob import iglob
 
 import argparse
 import os
-
 import sys
 
 sys.path.append("..")
 
+from lib.algorithms import PathFormulation, TEAVAR
 from lib.algorithms.abstract_formulation import OBJ_STRS
 from lib.partitioning import FMPartitioning, SpectralClustering
 
@@ -115,6 +115,20 @@ def get_problems(args):
                 topo_fname, tm_fname = topo_and_tm_fnames[slice]
                 problems.append((problem_name, topo_fname, tm_fname))
     return problems
+
+
+class AlgoClsAction(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        if value == "PathFormulation":
+            value = PathFormulation
+        elif value == "TEAVAR":
+            value = TEAVAR
+        setattr(namespace, self.dest, value)
 
 
 def get_args_and_problems(
