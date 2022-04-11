@@ -85,18 +85,6 @@ def benchmark(problems, output_csv, obj):
                         out=log,
                     )
                     cspf.solve(problem)
-                    # TODO: add this in later
-                    # cspf_sol_dict = cspf.sol_dict
-                    # with open(
-                    #     os.path.join(
-                    #         run_dir,
-                    #         "{}-cspf_objective-{}_{}-paths_edge-disjoint-{}_dist-metric-{}_sol-dict.pkl".format(
-                    #             problem_name, obj, num_paths, edge_disjoint, dist_metric
-                    #         ),
-                    #     ),
-                    #     "wb",
-                    # ) as w:
-                    #     pickle.dump(cspf_sol_dict, w)
 
                 result_line = PLACEHOLDER.format(
                     problem_name,
