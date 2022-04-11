@@ -23,7 +23,9 @@ CSVS_PATH = "../benchmarks/csvs"
 
 MARKER_NAMES_DICT = {
     "nc": "o",
+    "pop": ".",
     "pf": "*",
+    "cspf": "v",
     "smore": "x",
     "fe": "^",
     "fp": "s",
@@ -36,7 +38,8 @@ LINE_STYLES_DICT = {
     "nc": "solid",
     "pop": "dotted",
     "pf": "dashed",
-    "smore": "dashdot",
+    "cspf": "dashdot",
+    "smore": (0, (5, 1)),  # tightly dashed
     "fe": (0, (5, 10)),  # loosely dashed
     "fp": (0, (3, 5, 1, 5, 1, 5)),  # dashdotdotted
     "pfws": "dotted",
@@ -47,23 +50,24 @@ COLOR_NAMES_DICT = {
     "nc": palette[0],
     "pop": palette[1],
     "pf": palette[2],
-    "smore": palette[3],
-    "fe": palette[4],
-    "fp": palette[5],
-    "pfws": palette[6],
-    "pf-oracle": palette[7],
+    "cspf": palette[3],
+    "smore": palette[4],
+    "fe": palette[5],
+    "fp": palette[6],
+    "pfws": palette[7],
+    "pf-oracle": palette[8],
 }
 
 LABEL_NAMES_DICT = {
     "nc": "NCFlow",
     "pop": "POP, $k=16$",
     "pf": "$\mathrm{PF}_4$",
-    "pfws": "$\mathrm{PF}_{4{\sf w}}$",
-    "pf-oracle": "Instant $\mathrm{PF}_4$",
+    "cspf": "CSPF",
     "smore": "SMORE",
     "fe": "Fleischer-Edge, $\epsilon = 0.5$",
-    "fe": "Fleischer's Algorithm",
     "fp": "Fleischer-Path, $\epsilon = 0.5$",
+    "pfws": "$\mathrm{PF}_{4{\sf w}}$",
+    "pf-oracle": "Instant $\mathrm{PF}_4$",
 }
 
 PROBLEM_NAMES_DICT = {
@@ -202,6 +206,7 @@ def get_ratio_df(other_df, baseline_df, target_col, suffix):
     join_df = baseline_df.join(
         other_df, how="inner", lsuffix="_baseline", rsuffix=suffix
     ).reset_index()
+    print(suffix, len(join_df))
     results = []
     for _, row in join_df.iterrows():
         flow_ratio = (

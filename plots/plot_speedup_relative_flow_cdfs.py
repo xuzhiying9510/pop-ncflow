@@ -114,69 +114,67 @@ def sort_and_set_index(df, drop=False):
     ).set_index(["problem", "tm_model", "traffic_seed", "scale_factor"])
 
 
-def get_ratio_dataframes(csv_dir, query_str=None):
+def get_path_df(csv_dir, query_str=None):
     # Path Formulation DF
     path_df = (
-        pd.read_csv(os.path.join(csv_dir, "path-form-total_flow-slices_0_1_2_3_4.csv"))
+        pd.read_csv(os.path.join(csv_dir, "path-form-total_flow-slice_0_1_2_3_4.csv"))
         .drop(columns=["num_nodes", "num_edges", "num_commodities"])
         .query(PF_PARAMS)
     )
-    path_df = sort_and_set_index(path_df)
-    if query_str is not None:
-        path_df = path_df.query(query_str)
+    return sort_and_set_index(path_df)
 
+
+def get_pop_df(csv_dir, query_str=None):
     # POP DF
-    pop_df = pd.read_csv(os.path.join(csv_dir, "pop-total_flow-slice_0-k_16.csv"))
+    pop_df = pd.read_csv(
+        os.path.join(csv_dir, "pop-total_flow-slice_0_1_2_3_4-k_16.csv")
+    )
     pop_df = sort_and_set_index(pop_df, drop=True)
-    pop_df = pop_df.query(
+    return pop_df.query(
         '(split_fraction == 0.0 and tm_model != "poisson-high-intra") or (split_fraction == 0.75 and tm_model == "poisson-high-intra")'
     )
 
-    # NC Iterative DF
-    nc_iterative_df = per_iter_to_nc_df(
+
+def get_ncflow_df(csv_dir):
+    return per_iter_to_nc_df(
         os.path.join(csv_dir, "ncflow-total_flow-slices_0_1_2_3_4.csv")
     )
-    if query_str is not None:
-        nc_iterative_df = nc_iterative_df.query(query_str)
 
-    # Fleischer Path DF
-    fleischer_path_eps_05_df = (
-        pd.read_csv(os.path.join(csv_dir, "fleischer-with-paths.csv"))
-        .query("epsilon == 0.5")
+
+def get_fleischer_df(csv_dir, csv_fname, epsilon=0.5):
+    fleischer_df = (
+        pd.read_csv(os.path.join(csv_dir, csv_fname))
+        .query("epsilon == {}".format(epsilon))
         .drop(columns=["epsilon", "tm_attrs"])
     )
-    fleischer_path_eps_05_df = sort_and_set_index(fleischer_path_eps_05_df, drop=True)
-    if query_str is not None:
-        fleischer_path_eps_05_df = fleischer_path_eps_05_df.query(query_str)
+    return sort_and_set_index(fleischer_df, drop=True)
 
-    # Fleischer Edge DF
-    fleischer_edge_eps_05_df = (
-        pd.read_csv(os.path.join(csv_dir, "fleischer-edge.csv"))
-        .query("epsilon == 0.5")
-        .drop(columns=["epsilon", "tm_attrs"])
+
+def get_smore_df(csv_dir, num_paths=4):
+    smore_df = pd.read_csv(os.path.join(csv_dir, "smore.csv")).query(
+        "num_paths == {}".format(num_paths)
     )
-    fleischer_edge_eps_05_df = sort_and_set_index(fleischer_edge_eps_05_df, drop=True)
+    return sort_and_set_index(smore_df, drop=True)
+
+
+def get_cspf_df(csv_dir):
+    cspf_df = pd.read_csv(os.path.join(csv_dir, "cspf-total_flow-slice_0_1_2_3_4.csv"))
+    return sort_and_set_index(cspf_df, drop=True)
+
+
+def get_ratio_dataframes(csv_dir, query_str=None):
     if query_str is not None:
-        fleischer_edge_eps_05_df = fleischer_edge_eps_05_df.query(query_str)
+        path_df = path_df.query(query_str)
 
     # Smore DF
-    smore_df = pd.read_csv(os.path.join(csv_dir, "smore.csv"))
-    smore_df = sort_and_set_index(smore_df, drop=True)
     if query_str is not None:
         smore_df = smore_df.query(query_str)
 
+    if query_str is not None:
+        cspf_df = cspf_df.query(query_str)
+
     # Ratio DFs
-    return (
-        get_ratio_df(nc_iterative_df, path_df, "obj_val", "_nc"),
-        get_ratio_df(smore_df, path_df, "obj_val", "_smore"),
-        get_ratio_df(
-            fleischer_path_eps_05_df, path_df, "obj_val", "_fleischer_path_eps_05"
-        ),
-        get_ratio_df(
-            fleischer_edge_eps_05_df, path_df, "obj_val", "_fleischer_edge_eps_05"
-        ),
-        get_ratio_df(pop_df, path_df, "obj_val", "_pop"),
-    )
+    return ()
 
 
 def print_stats(ratio_df, label):
@@ -204,31 +202,51 @@ def print_stats(ratio_df, label):
     print()
 
 
-def plot_speedup_relative_flow_cdfs(curr_dir):
-    (
-        nc_iterative_ratio_df,
-        smore_ratio_df,
-        fleischer_path_eps_05_ratio_df,
-        fleischer_edge_eps_05_ratio_df,
-        pop_ratio_df,
-    ) = get_ratio_dataframes(
-        curr_dir, 'problem != "one-wan-bidir.json" and problem != "msft-8075.json"'
-    )
+def plot_speedup_relative_flow_cdfs(csv_dir):
+    query_str = 'problem != "one-wan-bidir.json" and problem != "msft-8075.json"'
+    path_df = get_path_df(csv_dir)
 
-    print_stats(nc_iterative_ratio_df, "NCFlow")
+    ncflow_df = get_ncflow_df(csv_dir)
+    pop_df = get_pop_df(csv_dir)
+    cspf_df = get_cspf_df(csv_dir)
+    smore_df = get_smore_df(csv_dir)
+    fleischer_path_eps_05_df = get_fleischer_df(csv_dir, "fleischer-with-paths.csv")
+    fleischer_edge_eps_05_df = get_fleischer_df(csv_dir, "fleischer-edge.csv")
+
+    technique_ratio_dfs = [
+        get_ratio_df(technique_df.query(query_str), path_df, "obj_val", suffix)
+        for (technique_df, suffix) in [
+            (ncflow_df, "_nc"),
+            (pop_df, "_pop"),
+            (cspf_df, "_cspf"),
+            (smore_df, "_smore"),
+            (fleischer_path_eps_05_df, "_fleischer_path_eps_05"),
+            (fleischer_edge_eps_05_df, "_fleischer_edge_eps_05"),
+        ]
+    ]
+
+    ncflow_ratio_df = technique_ratio_dfs[0]
+    pop_ratio_df = technique_ratio_dfs[1]
+    cspf_ratio_df = technique_ratio_dfs[2]
+    smore_ratio_df = technique_ratio_dfs[3]
+    fleischer_path_eps_05_ratio_df = technique_ratio_dfs[4]
+    fleischer_edge_eps_05_ratio_df = technique_ratio_dfs[5]
+
+    print_stats(ncflow_ratio_df, "NCFlow")
     print_stats(pop_ratio_df, "POP")
 
     # Plot CDFs
     plot_cdfs(
         [
-            nc_iterative_ratio_df["speedup_ratio"],
+            ncflow_ratio_df["speedup_ratio"],
+            pop_ratio_df["speedup_ratio"],
+            cspf_ratio_df["speedup_ratio"],
             smore_ratio_df["speedup_ratio"],
             fleischer_path_eps_05_ratio_df["speedup_ratio"],
             fleischer_edge_eps_05_ratio_df["speedup_ratio"],
-            pop_ratio_df["speedup_ratio"],
         ],
-        ["nc", "smore", "fp", "fe", "pop"],
-        ["nc", "smore", "fe", "fp", "pop"],
+        ["nc", "pop", "cspf", "smore", "fp", "fe"],
+        ["nc", "pop", "cspf", "smore", "fp", "fe"],
         "speedup-cdf",
         x_log=True,
         x_label=r"Speedup, relative to standard TE solver (log scale)",
@@ -241,29 +259,23 @@ def plot_speedup_relative_flow_cdfs(curr_dir):
 
     plot_cdfs(
         [
-            nc_iterative_ratio_df["flow_ratio"],
+            ncflow_ratio_df["flow_ratio"],
+            pop_ratio_df["flow_ratio"],
+            cspf_ratio_df["flow_ratio"],
             smore_ratio_df["flow_ratio"],
             fleischer_path_eps_05_ratio_df["flow_ratio"],
             fleischer_edge_eps_05_ratio_df["flow_ratio"],
-            pop_ratio_df["flow_ratio"],
         ],
-        ["nc", "smore", "fe", "fp", "pop"],
-        ["nc", "smore", "fe", "fp", "pop"],
+        ["nc", "pop", "cspf", "smore", "fp", "fe"],
+        ["nc", "pop", "cspf", "smore", "fp", "fe"],
         "total-flow-cdf",
         x_log=False,
-        xlim=(0.5, 1.2),
+        xlim=(0.2, 1.2),
         x_label=r"Total Flow, relative to standard TE solver",
         arrow_coords=(1.1, 0.2),
-        bbta=(0, 0, 1, 1.35),
+        bbta=(0, 0, 1, 1.45),
         figsize=(9, 4.5),
-        ncol=4,
-    )
-    return (
-        nc_iterative_ratio_df,
-        smore_ratio_df,
-        fleischer_edge_eps_05_ratio_df,
-        fleischer_path_eps_05_ratio_df,
-        pop_ratio_df,
+        ncol=3,
     )
 
 
