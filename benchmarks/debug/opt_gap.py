@@ -8,7 +8,7 @@ sys.path.append("../..")
 
 from lib.partitioning.hard_coded_partitioning import HardCodedPartitioning
 from lib.algorithms import NcfEpi, Objective, PathFormulation, POP
-from lib.problems import OptGapC1, OptGapC2, OptGapC3, OptGapC4, OptGapC5
+from lib.problems import OptGapC1, OptGapC2, OptGapC3, OptGapC4, BadForNCFlow, BadForPOP
 from lib.graph_utils import check_feasibility
 
 OBJ_STR = "total_flow"
@@ -23,8 +23,10 @@ def get_problem(problem_arg):
         return OptGapC3()
     elif problem_arg == "OptGapC4":
         return OptGapC4()
-    elif problem_arg == "OptGapC5":
-        return OptGapC5()
+    elif problem_arg == "BadForNCFlow":
+        return BadForNCFlow()
+    elif problem_arg == "BadForPOP":
+        return BadForPOP()
 
 
 def print_and_check(label, algo):
@@ -42,8 +44,10 @@ def get_partition_vector(problem_name):
         return [0, 0, 0, 0, 1, 1, 1]
     elif problem_name == "optgapc4":
         return [0, 0, 0, 1, 1, 1]
-    elif problem_name == "optgapc5":
+    elif problem_name == "BadForNCFlow":
         return [0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1]
+    elif problem_name == "BadForPOP":
+        return [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1]
     else:
         raise Exception("Unknown problem name: {}".format(problem_name))
 
@@ -96,7 +100,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--problem",
         type=str,
-        choices=["OptGapC1", "OptGapC2", "OptGapC3", "OptGapC4", "OptGapC5"],
+        choices=["OptGapC1", "OptGapC2", "OptGapC3", "OptGapC4", "BadForNCFlow", "BadForPOP"],
         required=True,
     )
     args = parser.parse_args()

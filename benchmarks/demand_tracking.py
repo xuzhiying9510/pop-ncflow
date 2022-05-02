@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from benchmark_consts import PATH_FORM_HYPERPARAMS, NCFLOW_HYPERPARAMS, print_
+from benchmark_helpers import PATH_FORM_HYPERPARAMS, NCFLOW_HYPERPARAMS, print_
 from glob import glob
 import numpy as np
 
@@ -8,6 +8,7 @@ import sys
 
 sys.path.append("..")
 
+from lib.constants import NUM_CORES
 from lib.algorithms import PathFormulation, NcfEpi
 from lib.problem import Problem
 from lib.graph_utils import compute_in_or_out_flow
@@ -93,7 +94,7 @@ class PF(object):
         return self.pf.runtime
 
 
-class NcI(object):
+class NCFlow(object):
     def __init__(self, G):
         num_paths, edge_disjoint, dist_metric, partition_cls, sf = NCFLOW_HYPERPARAMS[
             problems[0].name
@@ -117,7 +118,7 @@ class NcI(object):
 
     @property
     def runtime(self):
-        return self.ncflow.runtime_est(14)
+        return self.ncflow.runtime_est(NUM_CORES)
 
 
 def get_algo(arg, G):
@@ -126,7 +127,7 @@ def get_algo(arg, G):
     elif arg == "--pfws":
         return PFWarmStart()
     elif arg == "--ncflow":
-        return NcI(G)
+        return NCFlow(G)
     else:
         raise Exception('invalid argument "{}"'.format(arg))
 

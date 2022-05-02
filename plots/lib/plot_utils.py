@@ -5,6 +5,8 @@ import numpy as np
 
 plt.rcParams["pdf.fonttype"] = 42
 plt.rcParams["ps.fonttype"] = 42
+plt.rcParams["axes.grid"] = True
+
 sns.set_style("ticks")
 font = {
     "font.family": "Roboto",
@@ -19,7 +21,7 @@ sns.set_context("paper", font_scale=2, rc=paper_rc)
 sns.set_style({"axes.spines.right": False, "axes.spines.top": False})
 palette = sns.color_palette()
 
-CSVS_PATH = "../benchmarks/csvs"
+CSV_ROOT_DIR = "../benchmarks/csvs"
 
 MARKER_NAMES_DICT = {
     "nc": "o",
@@ -65,7 +67,8 @@ LABEL_NAMES_DICT = {
     "cspf": "CSPF",
     "smore": "SMORE",
     "fe": "Fleischer-Edge, $\epsilon = 0.5$",
-    "fp": "Fleischer-Path, $\epsilon = 0.5$",
+    # "fp": "Fleischer-Path, $\epsilon = 0.5$",
+    "fp": "Fleischer's Algorithm",
     "pfws": "$\mathrm{PF}_{4{\sf w}}$",
     "pf-oracle": "Instant $\mathrm{PF}_4$",
 }

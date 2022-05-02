@@ -308,7 +308,7 @@ class OptGapC4(Problem):
         return "optgapc4"
 
 
-class OptGapC5(Problem):
+class BadForNCFlow(Problem):
     def __init__(self):
         G = nx.DiGraph()
         G.add_node(0, label="0", pos=(-2, 1))
@@ -347,7 +347,52 @@ class OptGapC5(Problem):
 
     @property
     def name(self):
-        return "optgapc5"
+        return "BadForNCFlow"
+
+
+class BadForPOP(Problem):
+    def __init__(self):
+        G = nx.DiGraph()
+        G.add_node(0, label="0", pos=(-3, 0))
+        G.add_node(1, label="1", pos=(-2, 0))
+        G.add_node(2, label="2", pos=(-1, 0))
+        G.add_node(3, label="3", pos=(0, 0))
+        G.add_node(4, label="4", pos=(1, 0))
+        G.add_node(5, label="5", pos=(2, 0))
+        G.add_node(6, label="6", pos=(3, 0))
+
+        G.add_node(7, label="7", pos=(-2, 1))
+        G.add_node(8, label="8", pos=(-1, 1))
+        G.add_node(9, label="9", pos=(0, 1))
+        G.add_node(10, label="10", pos=(1, 1))
+        G.add_node(11, label="10", pos=(2, 1))
+
+        add_bi_edge(G, 0, 1, capacity=5)
+        add_bi_edge(G, 1, 2, capacity=5)
+        add_bi_edge(G, 2, 3, capacity=5)
+        add_bi_edge(G, 3, 4, capacity=5)
+        add_bi_edge(G, 4, 5, capacity=5)
+        add_bi_edge(G, 5, 6, capacity=5)
+
+        add_bi_edge(G, 1, 7, capacity=5)
+        add_bi_edge(G, 2, 8, capacity=5)
+        add_bi_edge(G, 3, 9, capacity=5)
+        add_bi_edge(G, 4, 10, capacity=5)
+        add_bi_edge(G, 5, 11, capacity=5)
+
+        num_nodes = len(G.nodes)
+        traffic_matrix = np.zeros((num_nodes, num_nodes), dtype=np.float32)
+        traffic_matrix[0, 6] = 15
+        traffic_matrix[7, 8] = 15
+        traffic_matrix[8, 9] = 15
+        traffic_matrix[9, 10] = 15
+        traffic_matrix[10, 11] = 15
+
+        super().__init__(G, traffic_matrix)
+
+    @property
+    def name(self):
+        return "BadForPOP"
 
 
 class WeNeedToFixThis(Problem):

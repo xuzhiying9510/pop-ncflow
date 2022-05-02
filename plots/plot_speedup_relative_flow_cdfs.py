@@ -13,9 +13,10 @@ from lib.plot_utils import (
     LABEL_NAMES_DICT,
     COLOR_NAMES_DICT,
     LINE_STYLES_DICT,
+    CSV_ROOT_DIR,
 )
 
-CSV_DIR = "../benchmarks/csvs/total-flow/"
+CSV_DIR = os.path.join(CSV_ROOT_DIR, "total-flow")
 
 PF_PARAMS = 'num_paths == 4 and edge_disjoint == True and dist_metric == "inv-cap"'
 
@@ -235,6 +236,10 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
     print_stats(ncflow_ratio_df, "NCFlow")
     print_stats(pop_ratio_df, "POP")
 
+    # techniques_to_plot = ["nc", "cspf", "smore", "fp"]
+    techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp"]
+    # techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp", "fe"]
+
     # Plot CDFs
     plot_cdfs(
         [
@@ -243,17 +248,17 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
             cspf_ratio_df["speedup_ratio"],
             smore_ratio_df["speedup_ratio"],
             fleischer_path_eps_05_ratio_df["speedup_ratio"],
-            fleischer_edge_eps_05_ratio_df["speedup_ratio"],
+            # fleischer_edge_eps_05_ratio_df["speedup_ratio"],
         ],
-        ["nc", "pop", "cspf", "smore", "fp", "fe"],
-        ["nc", "pop", "cspf", "smore", "fp", "fe"],
+        techniques_to_plot,
+        techniques_to_plot,
         "speedup-cdf",
         x_log=True,
         x_label=r"Speedup, relative to standard TE solver (log scale)",
         arrow_coords=(600.0, 0.2),
         bbta=(0, 0, 1, 2.3),
         figsize=(9, 3.5),
-        ncol=4,
+        ncol=len(techniques_to_plot),
         show_legend=False,
     )
 
@@ -264,18 +269,20 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
             cspf_ratio_df["flow_ratio"],
             smore_ratio_df["flow_ratio"],
             fleischer_path_eps_05_ratio_df["flow_ratio"],
-            fleischer_edge_eps_05_ratio_df["flow_ratio"],
+            # fleischer_edge_eps_05_ratio_df["flow_ratio"],
         ],
-        ["nc", "pop", "cspf", "smore", "fp", "fe"],
-        ["nc", "pop", "cspf", "smore", "fp", "fe"],
+        techniques_to_plot,
+        techniques_to_plot,
         "total-flow-cdf",
         x_log=False,
         xlim=(0.2, 1.2),
         x_label=r"Total Flow, relative to standard TE solver",
         arrow_coords=(1.1, 0.2),
-        bbta=(0, 0, 1, 1.45),
+        bbta=(0, 0, 1, 1.4),
+        # figsize=(9, 3.5),
         figsize=(9, 4.5),
-        ncol=3,
+        ncol=len(techniques_to_plot),
+        # show_legend=False,
     )
 
 
