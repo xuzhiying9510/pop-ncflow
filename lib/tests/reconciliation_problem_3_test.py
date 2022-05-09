@@ -1,13 +1,13 @@
 from .abstract_test import AbstractTest
-from ..problems import Recon3
+from ..problems import ReconciliationProblem3
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
 
-class Recon3Test(AbstractTest):
+class ReconciliationProblem3Test(AbstractTest):
     def __init__(self):
         super().__init__()
-        self.problem = Recon3()
+        self.problem = ReconciliationProblem3()
 
     @property
     def name(self):

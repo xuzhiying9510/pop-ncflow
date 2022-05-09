@@ -20,9 +20,12 @@ class ToyProblemTest(AbstractTest):
 
         self.assert_feasibility(ncf)
 
-        self.assert_eq_epsilon(ncf.r1_obj_val, 46.0)
-        self.assert_eq_epsilon(ncf.intra_obj_vals[0], 5.0)
-        self.assert_eq_epsilon(ncf.intra_obj_vals[1], 7.0)
+        self.assert_eq_epsilon(ncf._ncflows[0].r1_obj_val, 31.0)
+        self.assert_eq_epsilon(ncf._ncflows[0].intra_obj_vals[0], 5.0)
+        self.assert_eq_epsilon(ncf._ncflows[0].intra_obj_vals[1], 7.0)
+        self.assert_geq_epsilon(ncf._ncflows[0].r3_obj_val, 31)
 
-        self.assert_geq_epsilon(ncf.r3_obj_val, 45)
-        self.assert_geq_epsilon(ncf.obj_val, 57)
+        self.assert_geq_epsilon(ncf._ncflows[1].r1_obj_val, 7)
+        self.assert_geq_epsilon(ncf._ncflows[1].r3_obj_val, 7)
+
+        self.assert_geq_epsilon(ncf.obj_val, 55)

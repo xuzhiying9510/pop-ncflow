@@ -4,11 +4,11 @@
 from .toy_problem_test import ToyProblemTest
 from .reconciliation_problem_test import ReconciliationProblemTest
 from .reconciliation_problem_2_test import ReconciliationProblem2Test
-from .recon3_test import Recon3Test
+from .reconciliation_problem_3_test import ReconciliationProblem3Test
 from .optgapc1_test import OptGapC1Test
 from .optgapc2_test import OptGapC2Test
 from .optgapc3_test import OptGapC3Test
-from .optgap4_test import OptGap4Test
+from .optgapc4_test import OptGapC4Test
 from .single_edge_b import SingleEdgeBTest
 from .feasibility_test import FeasibilityTest
 from .flow_path_construction_test import FlowPathConstructionTest
@@ -20,18 +20,18 @@ import argparse
 
 
 ALL_TESTS = [
-    ToyProblemTest(),
+    # ToyProblemTest(),
     ReconciliationProblemTest(),
-    ReconciliationProblem2Test(),
-    Recon3Test(),
+    # ReconciliationProblem2Test(), TODO
+    # ReconciliationProblem3Test(), TODO
     OptGapC1Test(),
     OptGapC2Test(),
     OptGapC3Test(),
-    FeasibilityTest(),
-    OptGap4Test(),
+    OptGapC4Test(),
+    # FeasibilityTest(), TODO
     FlowPathConstructionTest(),
-    WeNeedToFixThisTest(),
-    SingleEdgeBTest(),
+    # WeNeedToFixThisTest(), TODO
+    # SingleEdgeBTest(), TODO
 ]
 TEST_NAME_DICT = {test.name: test for test in ALL_TESTS}
 

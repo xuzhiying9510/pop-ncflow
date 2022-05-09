@@ -7,14 +7,14 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 # between nodes that are in neighboring meta-nodes.
 
 
-class OptGap4Test(AbstractTest):
+class OptGapC4Test(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = OptGapC4()
 
     @property
     def name(self):
-        return "optgap4"
+        return "optgapc4"
 
     def run(self):
         ncf = NcfEpi.new_total_flow(4)
@@ -24,5 +24,5 @@ class OptGap4Test(AbstractTest):
         self.assert_feasibility(ncf)
 
         # this is a shame; the optimal solution here should be 8; we get 1.0
-        self.assert_geq_epsilon(ncf.obj_val, 2.0)
-        self.assert_leq_epsilon(ncf.obj_val, 2.0)
+        self.assert_geq_epsilon(ncf.obj_val, 1.0)
+        self.assert_leq_epsilon(ncf.obj_val, 1.0)

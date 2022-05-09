@@ -159,7 +159,7 @@ class ReconciliationProblem2(Problem):
         return "reconciliation-problem-2"
 
 
-class Recon3(Problem):
+class ReconciliationProblem3(Problem):
     def __init__(self):
         G = nx.DiGraph()
         G.add_node(0, label="0", pos=(-2, 0))
