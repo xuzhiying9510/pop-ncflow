@@ -104,7 +104,6 @@ def plot_cdfs(
         extra_artists.append(t)
     if save:
         save_figure(fname, extra_artists=extra_artists)
-    # plt.show()
 
 
 def sort_and_set_index(df, drop=False):
@@ -161,21 +160,6 @@ def get_smore_df(csv_dir, num_paths=4):
 def get_cspf_df(csv_dir):
     cspf_df = pd.read_csv(os.path.join(csv_dir, "cspf-total_flow-slice_0_1_2_3_4.csv"))
     return sort_and_set_index(cspf_df, drop=True)
-
-
-def get_ratio_dataframes(csv_dir, query_str=None):
-    if query_str is not None:
-        path_df = path_df.query(query_str)
-
-    # Smore DF
-    if query_str is not None:
-        smore_df = smore_df.query(query_str)
-
-    if query_str is not None:
-        cspf_df = cspf_df.query(query_str)
-
-    # Ratio DFs
-    return ()
 
 
 def print_stats(ratio_df, label):

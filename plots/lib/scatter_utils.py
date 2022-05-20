@@ -1,6 +1,62 @@
-import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 from .plot_utils import save_figure, COLOR_NAMES_DICT
+
+
+def pop_scatter_plot(
+    runtimes,
+    obj_vals,
+    labels,
+    ylabel,
+    ann_factor_x,
+    ann_factor_y,
+    arrow_coord_x,
+    arrow_coord_y,
+    arrow_rotation,
+    figsize=(7.5, 2.5),
+    annotate_values=False,
+    output_filename=None,
+):
+    plt.figure(figsize=figsize)
+    ax = plt.subplot2grid((1, 1), (0, 0), colspan=1)
+    for (runtime, obj_val, label) in zip(runtimes, obj_vals, labels):
+        ax.scatter(runtime, obj_val, label=label)
+        ax.annotate(label, (runtime * ann_factor_x, obj_val * ann_factor_y))
+        if annotate_values:
+            ax.annotate(
+                "{:.3f}".format(obj_val),
+                (runtime * ann_factor_x, obj_val * (0.85 / ann_factor_y)),
+            )
+
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel("Runtime (seconds)")
+    ax.set_xscale("log")
+    ax.yaxis.major.formatter._useMathText = True
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    xmin, xmax = plt.xlim()
+    ymin, ymax = plt.ylim()
+    plt.xlim(xmin, xmax * 1.2)
+    plt.ylim(0, 1.0)
+    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    sns.despine()
+
+    bbox_props = dict(boxstyle="larrow", ec="k", lw=2, fc="white")
+    t = ax.text(
+        arrow_coord_x,
+        arrow_coord_y,
+        "Better",
+        ha="center",
+        va="center",
+        rotation=arrow_rotation,
+        bbox=bbox_props,
+    )
+    bb = t.get_bbox_patch()
+    bb.set_boxstyle("larrow", pad=0.3)
+
+    if output_filename is not None:
+        with PdfPages(output_filename) as pdf:
+            pdf.savefig(bbox_inches="tight")
 
 
 def scatter_plot(
