@@ -8,7 +8,7 @@ import pandas as pd
 import re
 import os
 
-from lib.plot_utils import CSV_ROOT_DIR, save_figure
+from lib.plot_utils import CSV_ROOT_DIR, save_figure, moving_average
 from glob import iglob
 
 CSV_DIR = os.path.join(CSV_ROOT_DIR, "private-wan-csvs")
@@ -23,13 +23,6 @@ TIME_WINDOW = 5
 TIME_COLS = ["tm_date", "tm_time"]
 DATA_COLS = ["nc_time", "pop_time", "nc_flow", "pop_flow"]
 COLS = TIME_COLS + DATA_COLS
-
-
-def moving_average(a, n=MA_WINDOW):
-    a = np.array(a)
-    ret = np.cumsum(a)
-    ret[n:] = ret[n:] - ret[:-n]
-    return ret[n - 1 :] / n
 
 
 def add_timestamp_col(df):
@@ -52,7 +45,7 @@ def plot(ready_to_plot_df):
     fig, [ax0, ax1] = plt.subplots(nrows=2, ncols=1, figsize=(8.38, 6.5), sharex=True)
     ax0.plot(
         ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(ready_to_plot_df["nc_flow_0.0"]),
+        moving_average(ready_to_plot_df["nc_flow_0.0"], n=MA_WINDOW),
         # marker = 's',
         # markersize = MARKER_SIZE,
         # markevery = MARK_EVERY,

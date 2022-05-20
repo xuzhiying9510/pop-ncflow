@@ -111,6 +111,13 @@ NCFLOW_HYPERPARAMS = {
 SMORE_HYPERPARAMS = 4
 
 
+def moving_average(a, n):
+    a = np.array(a)
+    ret = np.cumsum(a)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1 :] / n
+
+
 def join_with_fib_entries(df, fib_entries_df, index_cols):
     return (
         df.set_index(index_cols)
