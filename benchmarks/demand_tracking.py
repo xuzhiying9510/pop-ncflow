@@ -9,7 +9,7 @@ import sys
 sys.path.append("..")
 
 from lib.constants import NUM_CORES
-from lib.algorithms import PathFormulation, NcfEpi
+from lib.algorithms import PathFormulation, NcfEpi, POP as PopAlgo
 from lib.problem import Problem
 from lib.graph_utils import compute_in_or_out_flow
 
@@ -121,6 +121,40 @@ class NCFlow(object):
         return self.ncflow.runtime_est(NUM_CORES)
 
 
+class POP(object):
+    def __init__(self):
+        num_subproblems = 16
+        split_method = "random"
+        split_fraction = 0.0
+        algo_cls = PathFormulation
+        num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
+
+        self.pop = PopAlgo.new_total_flow(
+            num_subproblems=num_subproblems,
+            split_method=split_method,
+            split_fraction=split_fraction,
+            algo_cls=algo_cls,
+            num_paths=num_paths,
+            edge_disjoint=edge_disjoint,
+            dist_metric=dist_metric,
+        )
+
+    def solve(self, problem):
+        self.pop.solve(problem)
+
+    @property
+    def sol_dict(self):
+        return self.pop.sol_dict
+
+    @property
+    def name(self):
+        return "pop"
+
+    @property
+    def runtime(self):
+        return self.pop.runtime_est(NUM_CORES)
+
+
 def get_algo(arg, G):
     if arg == "--path-form":
         return PF()
@@ -128,6 +162,8 @@ def get_algo(arg, G):
         return PFWarmStart()
     elif arg == "--ncflow":
         return NCFlow(G)
+    elif arg == "--pop":
+        return POP()
     else:
         raise Exception('invalid argument "{}"'.format(arg))
 

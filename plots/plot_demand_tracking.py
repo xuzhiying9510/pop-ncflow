@@ -353,13 +353,14 @@ def plot_demand_tracking(
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) > 1:
-    #     num_points = int(sys.argv[1])
-    # else:
-    #     num_points = 25
+    if len(sys.argv) > 1:
+        num_points = int(sys.argv[1])
+    else:
+        num_points = 25
     plot_demand_tracking(
-        os.path.join(CSV_ROOT_DIR, "demand-tracking", "no-unmet-demand"), 26
+        os.path.join(CSV_ROOT_DIR, "demand-tracking", "no-unmet-demand"), num_points + 1
     )
-    # for num_points in range(26):
-    #    print('plotting {} points'.format(num_points))
-    #    plot_demand_tracking('no-unmet-demand/', num_points)
+    if sys.argv[-1] == "--plot-all":
+        for n in range(num_points + 1):
+           print('plotting {} points'.format(n))
+           plot_demand_tracking('no-unmet-demand/', n)
