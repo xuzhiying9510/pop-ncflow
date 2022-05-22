@@ -1,17 +1,10 @@
 #! /usr/bin/env python
 
 from matplotlib.lines import Line2D
+from matplotlib.ticker import PercentFormatter
 from datetime import datetime, timedelta
 
-import os
-import pandas as pd
-import matplotlib.pyplot as plt
-
 # import matplotlib.dates as mdates
-from matplotlib.ticker import PercentFormatter
-import numpy as np
-import seaborn as sns
-
 
 from lib.plot_utils import (
     save_figure,
@@ -20,6 +13,16 @@ from lib.plot_utils import (
     LINE_STYLES_DICT,
     CSV_ROOT_DIR,
 )
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+import os
+import sys
+
 
 plt.rcParams["lines.markersize"] = 14
 plt.rcParams["lines.linewidth"] = 3.5
@@ -64,34 +67,34 @@ def get_xticks_time(tm_sequence):
     return [start_time + timedelta(minutes=i * 5) for i in tm_sequence]
 
 
+def get_dataframe_from_csv(csv_dir, csv_fname):
+    df = None
+    csv_path = os.path.join(csv_dir, csv_fname)
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        df["orig_total_demand"] = pd.Series(DEMAND_PER_TM)
+    else:
+        print("WARNING: could not find {}".format(csv_path))
+    return df
+
+
 def get_dataframes(csv_dir):
-    pfws_df = pd.read_csv(
-        os.path.join(csv_dir, "demand-tracking-path_formulation_warm_start.csv")
-    )
-    pfws_df["orig_total_demand"] = pd.Series(DEMAND_PER_TM)
-
-    ncflow_df = pd.read_csv(os.path.join(csv_dir, "demand-tracking-ncflow.csv"))
-    ncflow_df["orig_total_demand"] = pd.Series(DEMAND_PER_TM)
-
-    oracle_df = None
-    oracle_csv_path = os.path.join(
-        csv_dir, "demand-tracking-path_formulation-oracle.csv"
-    )
-    if os.path.exists(oracle_csv_path):
-        oracle_df = pd.read_csv(oracle_csv_path)
-        oracle_df["orig_total_demand"] = pd.Series(DEMAND_PER_TM)
-
-    pf_df = None
-    pf_csv_path = os.path.join(csv_dir, "demand-tracking-path_formulation.csv")
-    if os.path.exists(pf_csv_path):
-        pf_df = pd.read_csv(pf_csv_path)
-        pf_df["orig_total_demand"] = pd.Series(DEMAND_PER_TM)
-
-    return ncflow_df, pf_df, pfws_df, oracle_df
+    csv_suffixes = [
+        "ncflow",
+        "pop",
+        "path_formulation",
+        "path_formulation_warm_start",
+        "path_formulation_oracle",
+    ]
+    dfs = [
+        get_dataframe_from_csv(csv_dir, "demand-tracking-{}.csv".format(suffix))
+        for suffix in csv_suffixes
+    ]
+    return dfs[0], dfs[1], dfs[2], dfs[3], dfs[4]
 
 
 def plot_demand_tracking_flow_volume(csv_dir, figsize=(7, 3.5), ax=None):
-    ncflow_df, _, _, _ = get_dataframes(csv_dir)
+    ncflow_df, _, _, _, _ = get_dataframes(csv_dir)
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     # x_ticks_time = get_xticks_time(nci_df['tm_number'])
@@ -172,23 +175,58 @@ def plot_demand_tracking(
         df["cum_demand_never_satisfied"] = cum_demand_never_satisfied
         return df
 
-    _, ax = plt.subplots(figsize=figsize)
-    ncflow_df, pf_df, pfws_df, oracle_df = get_dataframes(csv_dir)
+    def print_stats(label, algo_df, oracle_df):
+        print("{}: Satisfied Demand Compared to Oracle:".format(label))
+        print(
+            (oracle_df["satisfied_demand"] - algo_df["satisfied_demand"])
+            / oracle_df["satisfied_demand"]
+        )
 
+    def plot_multiple_markers(df, label):
+        new_sols = list(np.argwhere(df["new_solution"] == 1.0).flatten())
+        if col_to_plot not in ["cum_demand_satisfied", "satisfied_demand"]:
+            new_sols.append(len(DEMAND_PER_TM))
+
+        old_sols = list(np.argwhere(df["new_solution"] == 0.0).flatten())
+        line = ax.plot(
+            df["tm_number"] * TIME_INTERVAL,
+            df[col_to_plot] / denom,
+            marker="o",
+            fillstyle="none",
+            markevery=new_sols,
+            linestyle=LINE_STYLES_DICT[label],
+            color=COLOR_NAMES_DICT[label],
+        )[0]
+        color = line.get_color()
+        handles.append(line)
+        labels.append(LABEL_NAMES_DICT[label])
+        ax.plot(
+            df["tm_number"] * TIME_INTERVAL,
+            df[col_to_plot] / denom,
+            marker="x",
+            fillstyle="none",
+            markevery=old_sols,
+            linestyle=LINE_STYLES_DICT[label],
+            color=color,
+        )
+
+    _, ax = plt.subplots(figsize=figsize)
+    ncflow_df, pop_df, pf_df, pfws_df, oracle_df = get_dataframes(csv_dir)
+
+    ncflow_df = add_stats_columns_to_df(ncflow_df)
+    pop_df = add_stats_columns_to_df(pop_df)
     pf_df = add_stats_columns_to_df(pf_df)
     pfws_df = add_stats_columns_to_df(pfws_df)
-    ncflow_df = add_stats_columns_to_df(ncflow_df)
     oracle_df = add_stats_columns_to_df(oracle_df)
-    print("Satisfied Demand Compared to Oracle:")
-    print(
-        (oracle_df["satisfied_demand"] - ncflow_df["satisfied_demand"])
-        / oracle_df["satisfied_demand"]
-    )
+
+    print_stats("NCFlow", ncflow_df, oracle_df)
+    print_stats("POP", pop_df, oracle_df)
 
     if col_to_plot in ["cum_demand_satisfied", "satisfied_demand"]:
+        ncflow_df = ncflow_df[:25]
+        pop_df = pop_df[:25]
         pf_df = pf_df[:25]
         pfws_df = pfws_df[:25]
-        ncflow_df = ncflow_df[:25]
         oracle_df = oracle_df[:25]
 
     handles, labels = [], []
@@ -232,33 +270,15 @@ def plot_demand_tracking(
     )
     labels.append(LABEL_NAMES_DICT["nc"])
 
-    def plot_multiple_markers(df, label):
-        new_sols = list(np.argwhere(df["new_solution"] == 1.0).flatten())
-        if col_to_plot not in ["cum_demand_satisfied", "satisfied_demand"]:
-            new_sols.append(len(DEMAND_PER_TM))
-
-        old_sols = list(np.argwhere(df["new_solution"] == 0.0).flatten())
-        line = ax.plot(
-            df["tm_number"] * TIME_INTERVAL,
-            df[col_to_plot] / denom,
-            marker="o",
-            fillstyle="none",
-            markevery=new_sols,
-            linestyle=LINE_STYLES_DICT[label],
-            color=COLOR_NAMES_DICT[label],
-        )[0]
-        color = line.get_color()
-        handles.append(line)
-        labels.append(LABEL_NAMES_DICT[label])
-        ax.plot(
-            df["tm_number"] * TIME_INTERVAL,
-            df[col_to_plot] / denom,
-            marker="x",
-            fillstyle="none",
-            markevery=old_sols,
-            linestyle=LINE_STYLES_DICT[label],
-            color=color,
-        )
+    handles += ax.plot(
+        pop_df["tm_number"] * TIME_INTERVAL,
+        pop_df[col_to_plot] / denom,
+        marker="o",
+        fillstyle="none",
+        linestyle=LINE_STYLES_DICT["pop"],
+        color=COLOR_NAMES_DICT["pop"],
+    )
+    labels.append(LABEL_NAMES_DICT["pop"])
 
     # if 'new_solution' in pf_df.columns:
     #     plot_multiple_markers(pf_df, 'pf')
@@ -344,6 +364,7 @@ def plot_demand_tracking(
     ax.grid(True)
     sns.despine()
     print("NC:", ncflow_df.iloc[-1]["cum_demand_satisfied"] / sum(DEMAND_PER_TM))
+    print("POP:", pop_df.iloc[-1]["cum_demand_satisfied"] / sum(DEMAND_PER_TM))
     print("PF:", pf_df.iloc[-1]["cum_demand_satisfied"] / sum(DEMAND_PER_TM))
     print("PFWS:", pfws_df.iloc[-1]["cum_demand_satisfied"] / sum(DEMAND_PER_TM))
     print("Oracle:", oracle_df.iloc[-1]["cum_demand_satisfied"] / sum(DEMAND_PER_TM))
@@ -362,5 +383,5 @@ if __name__ == "__main__":
     )
     if sys.argv[-1] == "--plot-all":
         for n in range(num_points + 1):
-           print('plotting {} points'.format(n))
-           plot_demand_tracking('no-unmet-demand/', n)
+            print("plotting {} points".format(n))
+            plot_demand_tracking("no-unmet-demand/", n)
