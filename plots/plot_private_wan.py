@@ -55,7 +55,7 @@ def plot(ready_to_plot_df):
     )
     ax0.plot(
         ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(ready_to_plot_df["pop_flow_0.0"]),
+        moving_average(ready_to_plot_df["pop_flow_0.0"], n=MA_WINDOW),
         # marker = 'o',
         # markersize = MARKER_SIZE,
         # markevery = MARK_EVERY,
@@ -63,22 +63,25 @@ def plot(ready_to_plot_df):
         linewidth=LINE_WIDTH,
         label="POP",
     )
-    ax0.plot(
-        ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(ready_to_plot_df["pop_flow_0.25"]),
-        # marker = '^',
-        # markersize = MARKER_SIZE,
-        # markevery = MARK_EVERY,
-        linestyle="-",
-        linewidth=LINE_WIDTH,
-        label="POP, with CS",
-    )
+    # ax0.plot(
+    #     ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
+    #     moving_average(ready_to_plot_df["pop_flow_0.25"], n=MA_WINDOW),
+    #     # marker = '^',
+    #     # markersize = MARKER_SIZE,
+    #     # markevery = MARK_EVERY,
+    #     linestyle="-",
+    #     linewidth=LINE_WIDTH,
+    #     label="POP, with CS",
+    # )
     ax0.set_ylabel("Total flow rel. to\n original problem")
+    ax0.set_ylim((0.8297367136563809, 1.0080873810319542))
+    ax0.set_yticks([0.85, 0.9, 0.95, 1.0])
     ax0.grid(True)
+
 
     ax1.plot(
         ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(1 / ready_to_plot_df["nc_time_0.0"]),
+        moving_average(1 / ready_to_plot_df["nc_time_0.0"], n=MA_WINDOW),
         # marker = 's',
         # markersize = MARKER_SIZE,
         # markevery = MARK_EVERY,
@@ -88,7 +91,7 @@ def plot(ready_to_plot_df):
     )
     ax1.plot(
         ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(1 / ready_to_plot_df["pop_time_0.0"]),
+        moving_average(1 / ready_to_plot_df["pop_time_0.0"], n=MA_WINDOW),
         # marker = 'o',
         # markersize = MARKER_SIZE,
         # markevery = MARK_EVERY,
@@ -96,18 +99,20 @@ def plot(ready_to_plot_df):
         linewidth=LINE_WIDTH,
         label="POP, +0x",
     )
-    ax1.plot(
-        ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
-        moving_average(1 / ready_to_plot_df["pop_time_0.25"]),
-        # marker = '^',
-        # markersize = MARKER_SIZE,
-        # markevery = MARK_EVERY,
-        linestyle="-",
-        linewidth=LINE_WIDTH,
-        label="POP, +0.25x",
-    )
+    # ax1.plot(
+    #     ready_to_plot_df["timedelta"][MA_WINDOW - 1 :],
+    #     moving_average(1 / ready_to_plot_df["pop_time_0.25"], n=MA_WINDOW),
+    #     # marker = '^',
+    #     # markersize = MARKER_SIZE,
+    #     # markevery = MARK_EVERY,
+    #     linestyle="-",
+    #     linewidth=LINE_WIDTH,
+    #     label="POP, +0.25x",
+    # )
     ax1.set_xlabel("Time (days)")
     ax1.set_ylabel("Speedup rel. to\n original problem")
+    ax1.set_ylim((5.804983213663454, 21.029909776264812))
+    ax1.set_yticks([10, 15, 20])
     ax1.grid(True)
 
     legend = ax0.legend(
@@ -142,9 +147,11 @@ if __name__ == "__main__":
 
     ready_to_plot_df = add_timestamp_col(join_df)
 
-    print(ready_to_plot_df["pop_flow_0.0"].median())
-    print(ready_to_plot_df["pop_flow_0.25"].median())
-    print(1 / ready_to_plot_df["pop_time_0.0"].median())
-    print(1 / ready_to_plot_df["pop_time_0.25"].median())
+    print("NCFlow, median flow ratio:", ready_to_plot_df["nc_flow_0.0"].median())
+    print("POP, no CS, median flow ratio:", ready_to_plot_df["pop_flow_0.0"].median())
+    print("POP, 25% CS, median flow ratio:", ready_to_plot_df["pop_flow_0.25"].median())
+    print("NCFlow, speedup", 1 / ready_to_plot_df["nc_time_0.0"].median())
+    print("POP, no CS, speedup", 1 / ready_to_plot_df["pop_time_0.0"].median())
+    print("POP, 25% CS, speedup", 1 / ready_to_plot_df["pop_time_0.25"].median())
 
     plot(ready_to_plot_df)

@@ -65,6 +65,7 @@ def plot_cdfs(
         ax.set_ylabel("Fraction of Cases")
     ax.set_yticks([0.0, 0.25, 0.5, 0.75, 1.0])
     ax.set_yticklabels([0.0, 0.25, 0.50, 0.75, 1.0])
+    ax.grid(True)
     if x_label:
         ax.set_xlabel(x_label)
     if x_log:
@@ -221,7 +222,7 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
     print_stats(pop_ratio_df, "POP")
 
     # techniques_to_plot = ["nc", "cspf", "smore", "fp"]
-    techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp"]
+    techniques_to_plot = ["nc", "pop", "smore", "fp"]
     # techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp", "fe"]
 
     # Plot CDFs
@@ -229,7 +230,7 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
         [
             ncflow_ratio_df["speedup_ratio"],
             pop_ratio_df["speedup_ratio"],
-            cspf_ratio_df["speedup_ratio"],
+            # cspf_ratio_df["speedup_ratio"],
             smore_ratio_df["speedup_ratio"],
             fleischer_path_eps_05_ratio_df["speedup_ratio"],
             # fleischer_edge_eps_05_ratio_df["speedup_ratio"],
@@ -250,7 +251,7 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
         [
             ncflow_ratio_df["flow_ratio"],
             pop_ratio_df["flow_ratio"],
-            cspf_ratio_df["flow_ratio"],
+            # cspf_ratio_df["flow_ratio"],
             smore_ratio_df["flow_ratio"],
             fleischer_path_eps_05_ratio_df["flow_ratio"],
             # fleischer_edge_eps_05_ratio_df["flow_ratio"],
