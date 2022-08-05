@@ -1,6 +1,6 @@
-# POP
+# POP + NCFlow
 
-Code repository for POP, a fork of the [NCFlow repository](https://github.com/netcontract/ncflow.git).
+Code repository for [POP](https://firasabuzaid.com/public/pop.pdf) and [NCFlow](https://www.usenix.org/system/files/nsdi21-abuzaid.pdf). This is originally a fork of the [NCFlow repository](https://github.com/netcontract/ncflow.git) that was created for the NSDI 2021 submission.
 
 Setup validated on Ubuntu 16.04.
 
