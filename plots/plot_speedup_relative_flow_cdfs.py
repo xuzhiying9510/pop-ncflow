@@ -222,8 +222,11 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
     print_stats(pop_ratio_df, "POP")
 
     # techniques_to_plot = ["nc", "cspf", "smore", "fp"]
-    techniques_to_plot = ["nc", "pop", "smore", "fp"]
+    # techniques_to_plot = ["nc", "pop", "smore", "fp"]
+    techniques_to_plot = ["nc", "pop"]
     # techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp", "fe"]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(15, 3.5))
 
     # Plot CDFs
     plot_cdfs(
@@ -231,20 +234,23 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
             ncflow_ratio_df["speedup_ratio"],
             pop_ratio_df["speedup_ratio"],
             # cspf_ratio_df["speedup_ratio"],
-            smore_ratio_df["speedup_ratio"],
-            fleischer_path_eps_05_ratio_df["speedup_ratio"],
+            # smore_ratio_df["speedup_ratio"],
+            # fleischer_path_eps_05_ratio_df["speedup_ratio"],
             # fleischer_edge_eps_05_ratio_df["speedup_ratio"],
         ],
         techniques_to_plot,
         techniques_to_plot,
         "speedup-cdf",
+        ax=ax2,
         x_log=True,
-        x_label=r"Speedup, relative to standard TE solver (log scale)",
+        x_label=r"Relative Speedup (log scale)",
         arrow_coords=(600.0, 0.2),
         bbta=(0, 0, 1, 2.3),
         figsize=(9, 3.5),
         ncol=len(techniques_to_plot),
+        add_ylabel=False,
         show_legend=False,
+        save=False,
     )
 
     plot_cdfs(
@@ -252,22 +258,36 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
             ncflow_ratio_df["flow_ratio"],
             pop_ratio_df["flow_ratio"],
             # cspf_ratio_df["flow_ratio"],
-            smore_ratio_df["flow_ratio"],
-            fleischer_path_eps_05_ratio_df["flow_ratio"],
+            # smore_ratio_df["flow_ratio"],
+            # fleischer_path_eps_05_ratio_df["flow_ratio"],
             # fleischer_edge_eps_05_ratio_df["flow_ratio"],
         ],
         techniques_to_plot,
         techniques_to_plot,
         "total-flow-cdf",
+        ax=ax1,
         x_log=False,
         xlim=(0.2, 1.2),
-        x_label=r"Total Flow, relative to standard TE solver",
+        x_label=r"Relative Total Flow",
         arrow_coords=(1.1, 0.2),
         bbta=(0, 0, 1, 1.4),
-        # figsize=(9, 3.5),
-        figsize=(9, 4.5),
         ncol=len(techniques_to_plot),
-        # show_legend=False,
+        show_legend=False,
+        save=False,
+    )
+    extra_artists = []
+    legend = ax1.legend(
+        ncol=len(techniques_to_plot),
+        loc="upper center",
+        bbox_to_anchor=(0, 0, 2.2, 1.2),
+        frameon=False,
+    )
+    extra_artists.append(legend)
+
+    fig.savefig(
+        "total-flow-and-speedup-cdfs.pdf",
+        bbox_inches="tight",
+        bbox_extra_artists=extra_artists,
     )
 
 

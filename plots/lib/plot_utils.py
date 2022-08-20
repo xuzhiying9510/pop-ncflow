@@ -62,7 +62,8 @@ COLOR_NAMES_DICT = {
 
 LABEL_NAMES_DICT = {
     "nc": "NCFlow",
-    "pop": "POP, $k=16$",
+    # "pop": "POP, $k=16$",
+    "pop": "POP",
     "pf": "$\mathrm{PF}_4$",
     "cspf": "CSPF",
     "smore": "SMORE",
