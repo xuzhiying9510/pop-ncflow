@@ -37,7 +37,7 @@ def assert_flow_conservation(flow_list, commod_key):
         assert False
 
     assert abs(out_flow[src] - in_flow[sink]) < EPS
-    assert out_flow[src] > 0.0
+    assert out_flow[src] > -EPS
 
     for node in in_flow.keys():
         if node == sink or node == src:
@@ -52,7 +52,9 @@ def compute_residual_problem(problem, sol_dict):
     tm = problem.traffic_matrix.tm
     for (k, (s_k, t_k, d_k)), flow_list in sol_dict.items():
         out_flow = compute_in_or_out_flow(flow_list, 0, {s_k})
-        assert out_flow >= 0.0
+        assert out_flow >= -EPS
+        if out_flow < 0:
+            out_flow = 0
         new_d_k = d_k - out_flow
         # clamp new demand to 0.0 to avoid floating point errors
         if new_d_k < EPS:
