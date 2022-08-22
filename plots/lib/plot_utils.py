@@ -37,39 +37,37 @@ MARKER_NAMES_DICT = {
 
 
 LINE_STYLES_DICT = {
-    "nc": "solid",
-    "pop": "dotted",
-    "pf": "dashed",
-    "cspf": "dashdot",
-    "smore": (0, (5, 1)),  # tightly dashed
-    "fe": (0, (5, 10)),  # loosely dashed
-    "fp": (0, (3, 5, 1, 5, 1, 5)),  # dashdotdotted
-    "pfws": "dotted",
-    "pf-oracle": "dashed",
+    'nc': '-', # solid
+    "pop": (0, (5, 1)), # densely dashed
+    "pf": "--", # dashed
+    "cspf": (0, (3, 1, 1, 1)), # densely dashdotted
+    'smore': '-.', # dashdot
+    'fe': ':', # dotted
+    'fp': '--', # dashed
+    'pfws': '-.', # dashdot
+    'pf-oracle': ':', #dotted
 }
 
 COLOR_NAMES_DICT = {
     "nc": palette[0],
+    "pf": palette[1],
     "pop": palette[1],
-    "pf": palette[2],
-    "cspf": palette[3],
-    "smore": palette[4],
-    "fe": palette[5],
-    "fp": palette[6],
-    "pfws": palette[7],
-    "pf-oracle": palette[8],
+    "smore": palette[2],
+    "fe": palette[3],
+    "fp": palette[4],
+    "pf-oracle": palette[6],
+    "cspf": palette[7],
+    "pfws": palette[9],
 }
 
 LABEL_NAMES_DICT = {
     "nc": "NCFlow",
-    # "pop": "POP, $k=16$",
-    "pop": "POP",
+    "pop": "POP, $k=16$",
     "pf": "$\mathrm{PF}_4$",
     "cspf": "CSPF",
-    "smore": "SMORE",
+    "smore": "SMORE*",
     "fe": "Fleischer-Edge, $\epsilon = 0.5$",
-    # "fp": "Fleischer-Path, $\epsilon = 0.5$",
-    "fp": "Fleischer's Algorithm",
+    "fp": "Fleischer-Path, $\epsilon = 0.5$",
     "pfws": "$\mathrm{PF}_{4{\sf w}}$",
     "pf-oracle": "Instant $\mathrm{PF}_4$",
 }

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
+from math import ceil
+
 from lib.plot_utils import (
     save_figure,
     change_poisson_in_df,
@@ -211,84 +213,76 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
         ]
     ]
 
-    ncflow_ratio_df = technique_ratio_dfs[0]
-    pop_ratio_df = technique_ratio_dfs[1]
-    cspf_ratio_df = technique_ratio_dfs[2]
-    smore_ratio_df = technique_ratio_dfs[3]
-    fleischer_path_eps_05_ratio_df = technique_ratio_dfs[4]
-    fleischer_edge_eps_05_ratio_df = technique_ratio_dfs[5]
+    ratio_df_dict = {
+            "cspf" : technique_ratio_dfs[2],
+            "smore":  technique_ratio_dfs[3],
+            "fp": technique_ratio_dfs[4],
+            "fe": technique_ratio_dfs[5],
+            "nc": technique_ratio_dfs[0],
+            "pop": technique_ratio_dfs[1],
+            }
 
-    print_stats(ncflow_ratio_df, "NCFlow")
-    print_stats(pop_ratio_df, "POP")
+    print_stats(ratio_df_dict["nc"], "NCFlow")
+    print_stats(ratio_df_dict["pop"], "POP")
 
-    # techniques_to_plot = ["nc", "cspf", "smore", "fp"]
-    # techniques_to_plot = ["nc", "pop", "smore", "fp"]
-    techniques_to_plot = ["nc", "pop"]
-    # techniques_to_plot = ["nc", "pop", "cspf", "smore", "fp", "fe"]
+    techniques_to_plot = ["cspf", "smore", "fp", "fe", "nc", "pop"]
+    techniques_to_plot_without_cspf = list(techniques_to_plot)
+    techniques_to_plot_without_cspf.remove("cspf")
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(15, 3.5))
+    # fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(15, 3.5))
 
     # Plot CDFs
     plot_cdfs(
         [
-            ncflow_ratio_df["speedup_ratio"],
-            pop_ratio_df["speedup_ratio"],
-            # cspf_ratio_df["speedup_ratio"],
-            # smore_ratio_df["speedup_ratio"],
-            # fleischer_path_eps_05_ratio_df["speedup_ratio"],
-            # fleischer_edge_eps_05_ratio_df["speedup_ratio"],
+            ratio_df_dict[technique]["speedup_ratio"] for technique in techniques_to_plot_without_cspf
         ],
-        techniques_to_plot,
-        techniques_to_plot,
+        techniques_to_plot_without_cspf,
+        techniques_to_plot_without_cspf,
         "speedup-cdf",
-        ax=ax2,
+        # ax=ax2,
         x_log=True,
-        x_label=r"Relative Speedup (log scale)",
+        x_label=r"Speedup, relative to $\mathrm{PF}_4$ (log scale)",
         arrow_coords=(600.0, 0.2),
         bbta=(0, 0, 1, 2.3),
         figsize=(9, 3.5),
         ncol=len(techniques_to_plot),
         add_ylabel=False,
         show_legend=False,
-        save=False,
+        save=True,
     )
 
     plot_cdfs(
         [
-            ncflow_ratio_df["flow_ratio"],
-            pop_ratio_df["flow_ratio"],
-            # cspf_ratio_df["flow_ratio"],
-            # smore_ratio_df["flow_ratio"],
-            # fleischer_path_eps_05_ratio_df["flow_ratio"],
-            # fleischer_edge_eps_05_ratio_df["flow_ratio"],
+            ratio_df_dict[technique]["flow_ratio"] for technique in techniques_to_plot
         ],
         techniques_to_plot,
         techniques_to_plot,
         "total-flow-cdf",
-        ax=ax1,
+        # ax=ax1,
         x_log=False,
         xlim=(0.2, 1.2),
-        x_label=r"Relative Total Flow",
-        arrow_coords=(1.1, 0.2),
-        bbta=(0, 0, 1, 1.4),
-        ncol=len(techniques_to_plot),
-        show_legend=False,
-        save=False,
+        x_label=r"Total Flow, relative to $\mathrm{PF}_4$",
+        arrow_coords=(1.1, 0.3),
+        bbta=(0, 0, 1, 1.3),
+        figsize=(9, 4.9),
+        ncol=ceil(len(techniques_to_plot) / 2),
+        show_legend=True,
+        save=True,
     )
-    extra_artists = []
-    legend = ax1.legend(
-        ncol=len(techniques_to_plot),
-        loc="upper center",
-        bbox_to_anchor=(0, 0, 2.2, 1.2),
-        frameon=False,
-    )
-    extra_artists.append(legend)
+    # extra_artists = []
+    # legend = ax1.legend(
+    #     ncol=len(techniques_to_plot),
+    #     loc="upper center",
+    #     bbox_to_anchor=(0, 0, 2.2, 1.2),
+    #     frameon=False,
+    # )
+    # extra_artists.append(legend)
 
-    fig.savefig(
-        "total-flow-and-speedup-cdfs.pdf",
-        bbox_inches="tight",
-        bbox_extra_artists=extra_artists,
-    )
+    # fig.savefig(
+    #     "total-flow-and-speedup-cdfs.pdf",
+    #     bbox_inches="tight",
+    #     bbox_extra_artists=extra_artists,
+    # )
 
 
 if __name__ == "__main__":
