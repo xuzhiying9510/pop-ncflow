@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import argparse
 
 from math import ceil
 
@@ -190,7 +191,8 @@ def print_stats(ratio_df, label):
     print()
 
 
-def plot_speedup_relative_flow_cdfs(csv_dir):
+def plot_speedup_relative_flow_cdfs(csv_dir, args):
+    single_figure = args.single_figure
     query_str = 'problem != "one-wan-bidir.json" and problem != "msft-8075.json"'
     path_df = get_path_df(csv_dir)
 
@@ -214,76 +216,124 @@ def plot_speedup_relative_flow_cdfs(csv_dir):
     ]
 
     ratio_df_dict = {
-            "cspf" : technique_ratio_dfs[2],
-            "smore":  technique_ratio_dfs[3],
-            "fp": technique_ratio_dfs[4],
-            "fe": technique_ratio_dfs[5],
-            "nc": technique_ratio_dfs[0],
-            "pop": technique_ratio_dfs[1],
-            }
+        "cspf": technique_ratio_dfs[2],
+        "smore": technique_ratio_dfs[3],
+        "fp": technique_ratio_dfs[4],
+        "fe": technique_ratio_dfs[5],
+        "nc": technique_ratio_dfs[0],
+        "pop": technique_ratio_dfs[1],
+    }
 
     print_stats(ratio_df_dict["nc"], "NCFlow")
     print_stats(ratio_df_dict["pop"], "POP")
 
     techniques_to_plot = ["cspf", "smore", "fp", "fe", "nc", "pop"]
     techniques_to_plot_without_cspf = list(techniques_to_plot)
-    techniques_to_plot_without_cspf.remove("cspf")
+    if "cspf" in techniques_to_plot_without_cspf:
+        techniques_to_plot_without_cspf.remove("cspf")
 
-    # fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(15, 3.5))
+    if single_figure:
+        fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(15, 3.5))
+        plot_cdfs(
+            [
+                ratio_df_dict[technique]["speedup_ratio"]
+                for technique in techniques_to_plot_without_cspf
+            ],
+            techniques_to_plot_without_cspf,
+            techniques_to_plot_without_cspf,
+            "speedup-cdf",
+            ax=ax2,
+            x_log=True,
+            x_label=r"Relative Speedup (log scale)",
+            arrow_coords=(600.0, 0.2),
+            bbta=(0, 0, 1, 2.3),
+            figsize=(9, 3.5),
+            ncol=len(techniques_to_plot),
+            add_ylabel=False,
+            show_legend=False,
+            save=False,
+        )
 
-    # Plot CDFs
-    plot_cdfs(
-        [
-            ratio_df_dict[technique]["speedup_ratio"] for technique in techniques_to_plot_without_cspf
-        ],
-        techniques_to_plot_without_cspf,
-        techniques_to_plot_without_cspf,
-        "speedup-cdf",
-        # ax=ax2,
-        x_log=True,
-        x_label=r"Speedup, relative to $\mathrm{PF}_4$ (log scale)",
-        arrow_coords=(600.0, 0.2),
-        bbta=(0, 0, 1, 2.3),
-        figsize=(9, 3.5),
-        ncol=len(techniques_to_plot),
-        add_ylabel=False,
-        show_legend=False,
-        save=True,
-    )
+        plot_cdfs(
+            [
+                ratio_df_dict[technique]["flow_ratio"]
+                for technique in techniques_to_plot
+            ],
+            techniques_to_plot,
+            techniques_to_plot,
+            "total-flow-cdf",
+            ax=ax1,
+            x_log=False,
+            xlim=(0.2, 1.2),
+            x_label=r"Relative Total Flow",
+            arrow_coords=(1.13, 0.2),
+            bbta=(0, 0, 1, 1.3),
+            figsize=(9, 4.9),
+            ncol=ceil(len(techniques_to_plot) / 2),
+            show_legend=False,
+            save=False,
+        )
+        extra_artists = []
+        legend = ax1.legend(
+            ncol=len(techniques_to_plot),
+            loc="upper center",
+            bbox_to_anchor=(0, 0, 2.2, 1.2),
+            frameon=False,
+        )
+        extra_artists.append(legend)
 
-    plot_cdfs(
-        [
-            ratio_df_dict[technique]["flow_ratio"] for technique in techniques_to_plot
-        ],
-        techniques_to_plot,
-        techniques_to_plot,
-        "total-flow-cdf",
-        # ax=ax1,
-        x_log=False,
-        xlim=(0.2, 1.2),
-        x_label=r"Total Flow, relative to $\mathrm{PF}_4$",
-        arrow_coords=(1.1, 0.3),
-        bbta=(0, 0, 1, 1.3),
-        figsize=(9, 4.9),
-        ncol=ceil(len(techniques_to_plot) / 2),
-        show_legend=True,
-        save=True,
-    )
-    # extra_artists = []
-    # legend = ax1.legend(
-    #     ncol=len(techniques_to_plot),
-    #     loc="upper center",
-    #     bbox_to_anchor=(0, 0, 2.2, 1.2),
-    #     frameon=False,
-    # )
-    # extra_artists.append(legend)
+        fig.savefig(
+            "total-flow-and-speedup-cdfs.pdf",
+            bbox_inches="tight",
+            bbox_extra_artists=extra_artists,
+        )
+    else:
+        plot_cdfs(
+            [
+                ratio_df_dict[technique]["speedup_ratio"]
+                for technique in techniques_to_plot_without_cspf
+            ],
+            techniques_to_plot_without_cspf,
+            techniques_to_plot_without_cspf,
+            "speedup-cdf",
+            x_log=True,
+            x_label=r"Speedup, relative to $\mathrm{PF}_4$ (log scale)",
+            arrow_coords=(600.0, 0.2),
+            bbta=(0, 0, 1, 2.3),
+            figsize=(9, 3.5),
+            ncol=len(techniques_to_plot),
+            add_ylabel=False,
+            show_legend=False,
+            save=True,
+        )
 
-    # fig.savefig(
-    #     "total-flow-and-speedup-cdfs.pdf",
-    #     bbox_inches="tight",
-    #     bbox_extra_artists=extra_artists,
-    # )
+        plot_cdfs(
+            [
+                ratio_df_dict[technique]["flow_ratio"]
+                for technique in techniques_to_plot
+            ],
+            techniques_to_plot,
+            techniques_to_plot,
+            "total-flow-cdf",
+            x_log=False,
+            xlim=(0.2, 1.2),
+            x_label=r"Total Flow, relative to $\mathrm{PF}_4$",
+            arrow_coords=(1.1, 0.3),
+            bbta=(0, 0, 1, 1.3),
+            figsize=(9, 4.9),
+            ncol=ceil(len(techniques_to_plot) / 2),
+            show_legend=True,
+            save=True,
+        )
 
 
 if __name__ == "__main__":
-    plot_speedup_relative_flow_cdfs(CSV_DIR)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--single-figure",
+        dest="single_figure",
+        action="store_true",
+        default=False,
+    )
+    args = parser.parse_args()
+    plot_speedup_relative_flow_cdfs(CSV_DIR, args)
