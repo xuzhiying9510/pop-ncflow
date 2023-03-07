@@ -1153,7 +1153,7 @@ class NCFlowSingleIter(NCFlowAbstract):
                 r2_solver.gurobi_out = self.out.name.replace(
                     ".txt", "-r2-{}.txt".format(meta_node_id)
                 )
-                r2_solver.solve_lp(r2_method)
+                r2_solver.solve_lp(r2_method, num_threads=1)
                 self.r2_models.append(r2_solver.model)
                 self.r2_mc_lists.append(multi_commodity_list)
 
@@ -1269,7 +1269,7 @@ class NCFlowSingleIter(NCFlowAbstract):
             reconciliation_solver.gurobi_out = self.out.name.replace(
                 ".txt", "-reconciliation-{}-{}.txt".format(u_meta, v_meta)
             )
-            reconciliation_solver.solve_lp(reconciliation_method)
+            reconciliation_solver.solve_lp(reconciliation_method, num_threads=1)
             self._runtime_dict["reconciliation"][
                 (u_meta, v_meta)
             ] = reconciliation_solver.model.Runtime
@@ -1355,7 +1355,7 @@ class NCFlowSingleIter(NCFlowAbstract):
             kirchoffs_solver = self._kirchoffs_lp(
                 meta_commod_key, orig_commod_list_in_k_meta
             )
-            kirchoffs_solver.solve_lp()
+            kirchoffs_solver.solve_lp(num_threads=1)
             if self.VERBOSE:
                 self._print(
                     "\ns_k_meta: {}, t_k_meta: {}, obj val: {}".format(
