@@ -12,38 +12,22 @@ from lib.algorithms.abstract_formulation import OBJ_STRS
 from lib.partitioning import FMPartitioning, SpectralClustering
 
 PROBLEM_NAMES = [
-    "GtsCe.graphml",
-    "UsCarrier.graphml",
-    "Cogentco.graphml",
-    "Colt.graphml",
-    "TataNld.graphml",
-    "Deltacom.graphml",
-    "DialtelecomCz.graphml",
-    "Kdl.graphml",
+    'Swan30.json',
+    'UsCarrier.json',
+    'Kdl.json',
+    'ASN2k.json',
 ]
 TM_MODELS = [
-    "uniform",
-    "gravity",
-    "bimodal",
-    "poisson-high-intra",
-    "poisson-high-inter",
+    "real",
 ]
-SCALE_FACTORS = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0]
+SCALE_FACTORS = [1.0]
 
-PATH_FORM_HYPERPARAMS = (4, True, "inv-cap")
+PATH_FORM_HYPERPARAMS = (4, True, "min-hop")
 NCFLOW_HYPERPARAMS = {
-    "GtsCe.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "UsCarrier.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Cogentco.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Colt.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "TataNld.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Deltacom.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "DialtelecomCz.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Uninett2010.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Interoute.graphml": (4, True, "inv-cap", SpectralClustering, 2),
-    "Ion.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "Kdl.graphml": (4, True, "inv-cap", FMPartitioning, 3),
-    "erdos-renyi-1260231677.json": (4, True, "inv-cap", FMPartitioning, 3),
+    'Swan30.json': (4, True, 'min-hop', FMPartitioning, 3),
+    'UsCarrier.json': (4, True, 'min-hop', FMPartitioning, 3),
+    'Kdl.json': (4, True, 'min-hop', FMPartitioning, 3),
+    'ASN2k.json': (4, True, 'min-hop', FMPartitioning, 3),
 }
 
 PROBLEM_NAMES_AND_TM_MODELS = [
@@ -59,10 +43,10 @@ for problem_name in PROBLEM_NAMES:
     if problem_name.endswith(".graphml"):
         topo_fname = os.path.join("..", "topologies", "topology-zoo", problem_name)
     else:
-        topo_fname = os.path.join("..", "topologies", problem_name)
+        topo_fname = os.path.join("..", "..", "topologies", problem_name)
     for model in TM_MODELS:
         for tm_fname in iglob(
-            "../traffic-matrices/{}/{}*_traffic-matrix.pkl".format(model, problem_name)
+            "../../traffic-matrices/{}/{}*_traffic-matrix.pkl".format(model, problem_name)
         ):
             vals = os.path.basename(tm_fname)[:-4].split("_")
             _, traffic_seed, scale_factor = vals[1], int(vals[2]), float(vals[3])
@@ -177,7 +161,6 @@ def get_args_and_problems(
             "--scale-factor", type=float, choices=SCALE_FACTORS, required=True
         )
         parser.add_argument("--slice", type=int, choices=range(5), required=True)
-
     for add_arg in additional_args:
         name_or_flags, kwargs = add_arg[0], add_arg[1]
         parser.add_argument(name_or_flags, **kwargs)
