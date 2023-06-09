@@ -489,7 +489,7 @@ class NCFlowEdgePerIter(AbstractFormulation):
                 else:
                     return sum(1.0 / cap for cap in caps)
             elif dist_metric == "min-hop":
-                return len(path_to_edge_list(path))
+                return len(list(path_to_edge_list(path)))
             else:
                 raise Exception("invalid dist_metric: {}".format(dist_metric))
 
