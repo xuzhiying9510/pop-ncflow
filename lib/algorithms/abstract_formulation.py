@@ -1,7 +1,6 @@
 from ..graph_utils import compute_in_or_out_flow
 from collections import defaultdict
 from enum import Enum, unique
-import time
 import pickle
 import re
 import sys
@@ -49,9 +48,7 @@ class AbstractFormulation(object):
 
     def solve(self, problem, fixed_total_flows=[], **args):
         self._problem = problem
-        starttime = time.time()
         self._solver = self._construct_lp(fixed_total_flows)
-        self.buildtime = time.time() - starttime
         return self._solver.solve_lp(**args)
 
     def solve_warm_start(self, problem):

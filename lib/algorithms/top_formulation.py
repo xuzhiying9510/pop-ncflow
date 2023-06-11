@@ -2,6 +2,7 @@ import os
 import pickle
 import re
 from collections import defaultdict
+import time
 
 import numpy as np
 from gurobipy import GRB, Model, quicksum
@@ -258,7 +259,9 @@ class TopFormulation(AbstractFormulation):
 
     def solve(self, problem, num_threads=NUM_CORES):
         self._problem = problem
+        starttime = time.time()
         self._solver = self._construct_lp([])
+        self.buildtime = time.time() - starttime
         return self._solver.solve_lp(num_threads=num_threads)
 
     def pre_solve(self, problem=None):
