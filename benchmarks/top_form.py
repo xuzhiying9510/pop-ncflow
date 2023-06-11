@@ -30,6 +30,7 @@ HEADERS = [
     "dist_metric",
     "objective",
     "obj_val",
+    "buildtime",
     "runtime",
 ]
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
@@ -115,6 +116,7 @@ def benchmark(problems, output_csv, obj):
                     dist_metric,
                     obj,
                     pf.obj_val,
+                    pf.buildtime,
                     pf.runtime,
                 )
                 print_(result_line, file=results)
