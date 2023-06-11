@@ -152,7 +152,7 @@ def get_args_and_problems(
             default="all",
         )
         parser.add_argument(
-            "--slices", type=int, choices=range(5), nargs="+", required=True
+            "--slices", type=int, nargs="+", required=True
         )
     else:
         parser.add_argument("--tm-model", type=str, choices=TM_MODELS, required=True)
@@ -160,14 +160,15 @@ def get_args_and_problems(
         parser.add_argument(
             "--scale-factor", type=float, choices=SCALE_FACTORS, required=True
         )
-        parser.add_argument("--slice", type=int, choices=range(5), required=True)
+        parser.add_argument("--slice", type=int, required=True)
     for add_arg in additional_args:
         name_or_flags, kwargs = add_arg[0], add_arg[1]
         parser.add_argument(name_or_flags, **kwargs)
     args = parser.parse_args()
     if many_problems:
-        slice_str = "slice_" + "_".join(str(i) for i in args.slices)
+        slice_str = "" # "slice_" + "_".join(str(i) for i in args.slices)
         formatted_fname_substr = formatted_fname_template.format(args.obj, slice_str)
+        print(formatted_fname_substr)
         return args, formatted_fname_substr, get_problems(args)
     else:
         formatted_fname_substr = format_args_for_filename(
@@ -178,7 +179,7 @@ def get_args_and_problems(
 
 # Should only be used when `many_problems` is False
 def format_args_for_filename(template, args, additional_args):
-    slice_str = "slice_{}".format(args.slice)
+    slice_str = "" # "slice_{}".format(args.slice)
     additional_info_str = "problem_{}-tm_model_{}-scale_factor_{}".format(
         args.topo, args.tm_model, args.scale_factor
     )
