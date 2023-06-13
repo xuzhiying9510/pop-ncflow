@@ -10,6 +10,7 @@ sys.path.append("..")
 from lib.algorithms import PathFormulation, TEAVAR
 from lib.algorithms.abstract_formulation import OBJ_STRS
 from lib.partitioning import FMPartitioning, SpectralClustering
+from lib.config import TOPOLOGIES_DIR, TM_DIR
 
 PROBLEM_NAMES = [
     'Swan30.json',
@@ -41,12 +42,12 @@ GROUPED_BY_HOLDOUT_PROBLEMS = defaultdict(list)
 
 for problem_name in PROBLEM_NAMES:
     if problem_name.endswith(".graphml"):
-        topo_fname = os.path.join("..", "topologies", "topology-zoo", problem_name)
+        topo_fname = os.path.join(TOPOLOGIES_DIR, "topology-zoo", problem_name)
     else:
-        topo_fname = os.path.join("..", "..", "topologies", problem_name)
+        topo_fname = os.path.join(TOPOLOGIES_DIR, problem_name)
     for model in TM_MODELS:
         for tm_fname in iglob(
-            "../../traffic-matrices/{}/{}*_traffic-matrix.pkl".format(model, problem_name)
+            "{}/{}/{}*_traffic-matrix.pkl".format(TM_DIR, model, problem_name)
         ):
             vals = os.path.basename(tm_fname)[:-4].split("_")
             _, traffic_seed, scale_factor = vals[1], int(vals[2]), float(vals[3])
@@ -55,8 +56,8 @@ for problem_name in PROBLEM_NAMES:
             )
             PROBLEMS.append((problem_name, topo_fname, tm_fname))
         for tm_fname in iglob(
-            "../traffic-matrices/holdout/{}/{}*_traffic-matrix.pkl".format(
-                model, problem_name
+            "{}/holdout/{}/{}*_traffic-matrix.pkl".format(
+                TM_DIR, model, problem_name
             )
         ):
             vals = os.path.basename(tm_fname)[:-4].split("_")
