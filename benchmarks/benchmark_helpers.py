@@ -91,7 +91,7 @@ def get_problems(args):
         (problem_name, tm_model, scale_factor),
         topo_and_tm_fnames,
     ) in GROUPED_BY_PROBLEMS.items():
-        for slice in args.slices:
+        for slice in range(0,200):#args.slices:
             if (
                 ("all" in args.topos or problem_name in args.topos)
                 and ("all" in args.tm_models or tm_model in args.tm_models)
@@ -167,7 +167,7 @@ def get_args_and_problems(
         parser.add_argument(name_or_flags, **kwargs)
     args = parser.parse_args()
     if many_problems:
-        slice_str = "" # "slice_" + "_".join(str(i) for i in args.slices)
+        slice_str = args.topos[0] # "" # "slice_" + "_".join(str(i) for i in args.slices)
         formatted_fname_substr = formatted_fname_template.format(args.obj, slice_str)
         return args, formatted_fname_substr, get_problems(args)
     else:
@@ -179,7 +179,7 @@ def get_args_and_problems(
 
 # Should only be used when `many_problems` is False
 def format_args_for_filename(template, args, additional_args):
-    slice_str = "" # "slice_{}".format(args.slice)
+    slice_str = "slice_{}".format(args.slice)
     additional_info_str = "problem_{}-tm_model_{}-scale_factor_{}".format(
         args.topo, args.tm_model, args.scale_factor
     )
