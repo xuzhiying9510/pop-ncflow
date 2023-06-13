@@ -169,7 +169,6 @@ def get_args_and_problems(
     if many_problems:
         slice_str = "" # "slice_" + "_".join(str(i) for i in args.slices)
         formatted_fname_substr = formatted_fname_template.format(args.obj, slice_str)
-        print(formatted_fname_substr)
         return args, formatted_fname_substr, get_problems(args)
     else:
         formatted_fname_substr = format_args_for_filename(
