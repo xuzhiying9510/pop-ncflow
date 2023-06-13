@@ -13,6 +13,7 @@ from lib.partitioning import FMPartitioning, SpectralClustering
 from lib.config import TOPOLOGIES_DIR, TM_DIR
 
 PROBLEM_NAMES = [
+    'B4.json',
     'Swan30.json',
     'UsCarrier.json',
     'Kdl.json',
