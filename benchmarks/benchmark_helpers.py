@@ -71,11 +71,13 @@ for problem_name in PROBLEM_NAMES:
 
 GROUPED_BY_PROBLEMS = dict(GROUPED_BY_PROBLEMS)
 for key, vals in GROUPED_BY_PROBLEMS.items():
-    GROUPED_BY_PROBLEMS[key] = sorted(vals)
+    GROUPED_BY_PROBLEMS[key] = sorted(vals, 
+        key=lambda x: int(x[-1].split('_')[-3]))
 
 GROUPED_BY_HOLDOUT_PROBLEMS = dict(GROUPED_BY_HOLDOUT_PROBLEMS)
 for key, vals in GROUPED_BY_HOLDOUT_PROBLEMS.items():
-    GROUPED_BY_HOLDOUT_PROBLEMS[key] = sorted(vals)
+    GROUPED_BY_HOLDOUT_PROBLEMS[key] = sorted(vals, 
+        key=lambda x: int(x[-1].split('_')[-3]))
 
 
 # This should be called when `many_problems` is False
@@ -93,15 +95,14 @@ def get_problems(args):
         (problem_name, tm_model, scale_factor),
         topo_and_tm_fnames,
     ) in GROUPED_BY_PROBLEMS.items():
-        for slice in args.slices:
+        for topo_fname, tm_fname in topo_and_tm_fnames:
             if (
                 ("all" in args.topos or problem_name in args.topos)
                 and ("all" in args.tm_models or tm_model in args.tm_models)
                 and ("all" in args.scale_factors or scale_factor in args.scale_factors)
             ):
-                topo_fname, tm_fname = topo_and_tm_fnames[slice]
                 problems.append((problem_name, topo_fname, tm_fname))
-    return problems
+    return problems[args.slices_start:args.slices_stop]
 
 
 class AlgoClsAction(argparse.Action):
@@ -155,7 +156,10 @@ def get_args_and_problems(
             default="all",
         )
         parser.add_argument(
-            "--slices", type=int, nargs="+", required=True
+            "--slices_start", type=int, default = 800
+        )
+        parser.add_argument(
+            "--slices_stop", type=int, default = 1000 
         )
     else:
         parser.add_argument("--tm-model", type=str, choices=TM_MODELS, required=True)
@@ -169,7 +173,7 @@ def get_args_and_problems(
         parser.add_argument(name_or_flags, **kwargs)
     args = parser.parse_args()
     if many_problems:
-        slice_str = "" # "slice_" + "_".join(str(i) for i in args.slices)
+        slice_str = "all" # "slice_" + "_".join(str(i) for i in args.slices)
         formatted_fname_substr = formatted_fname_template.format(args.obj, slice_str)
         return args, formatted_fname_substr, get_problems(args)
     else:
@@ -178,10 +182,9 @@ def get_args_and_problems(
         )
         return args, formatted_fname_substr, get_problem(args)
 
-
 # Should only be used when `many_problems` is False
 def format_args_for_filename(template, args, additional_args):
-    slice_str = "" # "slice_{}".format(args.slice)
+    slice_str = "slice_{}".format(args.slice)
     additional_info_str = "problem_{}-tm_model_{}-scale_factor_{}".format(
         args.topo, args.tm_model, args.scale_factor
     )
