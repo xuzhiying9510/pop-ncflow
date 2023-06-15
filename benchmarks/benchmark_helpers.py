@@ -102,7 +102,7 @@ def get_problems(args):
                 and ("all" in args.scale_factors or scale_factor in args.scale_factors)
             ):
                 problems.append((problem_name, topo_fname, tm_fname))
-    return problems[args.slices_start:args.slices_stop]
+    return problems[args.slice_start:args.slice_stop]
 
 
 class AlgoClsAction(argparse.Action):
@@ -156,10 +156,10 @@ def get_args_and_problems(
             default="all",
         )
         parser.add_argument(
-            "--slices_start", type=int, default = 800
+            "--slice-start", type=int, default = 800
         )
         parser.add_argument(
-            "--slices_stop", type=int, default = 1000 
+            "--slice-stop", type=int, default = 1000 
         )
     else:
         parser.add_argument("--tm-model", type=str, choices=TM_MODELS, required=True)
