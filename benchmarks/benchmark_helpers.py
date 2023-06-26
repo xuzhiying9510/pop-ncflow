@@ -14,7 +14,6 @@ from lib.config import TOPOLOGIES_DIR, TM_DIR
 
 PROBLEM_NAMES = [
     'B4.json',
-    'Swan30.json',
     'UsCarrier.json',
     'Kdl.json',
     'ASN2k.json',
@@ -27,7 +26,6 @@ SCALE_FACTORS = [1.0]
 PATH_FORM_HYPERPARAMS = (4, True, "min-hop")
 NCFLOW_HYPERPARAMS = {
     'B4.json': (4, True, 'min-hop', FMPartitioning, 3),
-    'Swan30.json': (4, True, 'min-hop', FMPartitioning, 3),
     'UsCarrier.json': (4, True, 'min-hop', FMPartitioning, 3),
     'Kdl.json': (4, True, 'min-hop', FMPartitioning, 3),
     'ASN2k.json': (4, True, 'min-hop', FMPartitioning, 3),
