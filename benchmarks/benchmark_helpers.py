@@ -154,10 +154,10 @@ def get_args_and_problems(
             default="all",
         )
         parser.add_argument(
-            "--slice-start", type=int, default = 160
+            "--slice-start", type=int, default = 28
         )
         parser.add_argument(
-            "--slice-stop", type=int, default = 200 
+            "--slice-stop", type=int, default = 36 
         )
     else:
         parser.add_argument("--tm-model", type=str, choices=TM_MODELS, required=True)
