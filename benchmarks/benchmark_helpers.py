@@ -117,12 +117,22 @@ class AlgoClsAction(argparse.Action):
         setattr(namespace, self.dest, value)
 
 
+def check_gurobi_license():
+    if not os.system('gurobi_cl --license'):
+        return True
+    else:
+        return False
+
+
 def get_args_and_problems(
     formatted_fname_template,
     additional_args=[],
     *,
     many_problems=True,
 ):
+    if not check_gurobi_license():
+        raise Exception("Gurobi license not found")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
     parser.add_argument(
