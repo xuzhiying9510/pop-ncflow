@@ -279,7 +279,8 @@ class TopFormulation(AbstractFormulation):
         self._all_paths = []
 
         # only solve top % demands with lp
-        self.top_d_threshold = np.quantile([d_k for k, (s_k, t_k, d_k) 
+        self.top_d_threshold = np.quantile(
+            [d_k for k, (s_k, t_k, d_k)
             in self.commodity_list if d_k > 0.001], 1-self._top_percentage)
 
         paths_dict = self.get_paths(problem)
@@ -334,22 +335,54 @@ class TopFormulation(AbstractFormulation):
                     self._sol_dict[commod_key] = []
 
             # Set rest of the demands
-            self._rest_objVal = 0
-            capacity_dict = {(u, v):data['capacity'] for u,v,data 
-                in self.problem.G.edges(data=True)}
-            for commod_key in self._sol_dict:
-                for ((u, v), flow_per_path_per_commod) in self._sol_dict[commod_key]:
-                    capacity_dict[(u, v)] -= flow_per_path_per_commod
-            for k, (s_k, t_k, d_k) in self.commodity_list:
-                if d_k >= self.top_d_threshold:
-                    continue
-                capacity = min([d_k] + [capacity_dict[(u, v)] for u, v 
-                    in zip(self._paths_dict[(s_k, t_k)][0][:-1], self._paths_dict[(s_k, t_k)][0][1:])])
-                self._rest_objVal += capacity
-                for u, v in zip(self._paths_dict[(s_k, t_k)][0][:-1], self._paths_dict[(s_k, t_k)][0][1:]):
-                    capacity_dict[(u, v)] -= capacity
-                self._sol_dict[self.commodity_list[k]] = [((u, v), capacity) for u, v 
-                    in zip(self._paths_dict[(s_k, t_k)][0][:-1], self._paths_dict[(s_k, t_k)][0][1:])]
+            if self._objective == Objective.TOTAL_FLOW:
+                self._total_objVal = self._solver.model.objVal
+                capacity_dict = {
+                    (u, v): data['capacity'] for u, v, data
+                    in self.problem.G.edges(data=True)}
+                for commod_key in self._sol_dict:
+                    for ((u, v), flow_per_path_per_commod) in self._sol_dict[commod_key]:
+                        capacity_dict[(u, v)] -= flow_per_path_per_commod
+                for k, (s_k, t_k, d_k) in self.commodity_list:
+                    if d_k >= self.top_d_threshold:
+                        continue
+                    capacity = min([d_k] + [capacity_dict[(u, v)] for u, v
+                        in zip(
+                            self._paths_dict[(s_k, t_k)][0][:-1],
+                            self._paths_dict[(s_k, t_k)][0][1:])])
+                    self._total_objVal += capacity
+                    for u, v in zip(
+                        self._paths_dict[(s_k, t_k)][0][:-1],
+                        self._paths_dict[(s_k, t_k)][0][1:]):
+                        capacity_dict[(u, v)] -= capacity
+                    self._sol_dict[self.commodity_list[k]] = [
+                        ((u, v), capacity) for u, v
+                        in zip(
+                            self._paths_dict[(s_k, t_k)][0][:-1],
+                            self._paths_dict[(s_k, t_k)][0][1:])]
+            elif self._objective == Objective.MIN_MAX_LINK_UTIL:
+                capacity_dict = {
+                    (u, v): [data['capacity'], 0] for u, v, data
+                    in self.problem.G.edges(data=True)}
+                for commod_key in self._sol_dict:
+                    for ((u, v), flow_per_path_per_commod) in self._sol_dict[commod_key]:
+                        capacity_dict[(u, v)][1] += flow_per_path_per_commod
+                for k, (s_k, t_k, d_k) in self.commodity_list:
+                    if d_k >= self.top_d_threshold:
+                        continue
+                    for u, v in zip(
+                        self._paths_dict[(s_k, t_k)][0][:-1],
+                        self._paths_dict[(s_k, t_k)][0][1:]):
+                        capacity_dict[(u, v)][1] += d_k
+                    self._sol_dict[self.commodity_list[k]] = [
+                        ((u, v), d_k) for u, v
+                        in zip(
+                            self._paths_dict[(s_k, t_k)][0][:-1],
+                            self._paths_dict[(s_k, t_k)][0][1:])]
+                self._total_objVal = max([v[1]/v[0] for k, v in capacity_dict.items()])
+            else:
+                raise NotImplementedError(
+                    f"Objective {self._objective} needs to be implemented!")
 
         return self._sol_dict
 
@@ -404,4 +437,4 @@ class TopFormulation(AbstractFormulation):
 
     @property
     def obj_val(self):
-        return self._solver.model.objVal + self._rest_objVal
+        return self._total_objVal
